@@ -7,7 +7,6 @@ import { CompanyCard } from "@/components/company/CompanyCard";
 import { CompanyTable } from "@/components/company/CompanyTable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -18,11 +17,9 @@ import {
 } from "@/components/ui/pagination";
 import { useFetchCompanies } from "@/api/company/api.company";
 import { CompanyFilterDto } from "@/types";
-import {
-  ICompany,
-  ICompanyList,
-} from "@/components/interface/company/company.interface";
+import { ICompanyList } from "@/components/interface/company/company.interface";
 import { useRouter } from "next/navigation";
+import { ErrorView, LoadingView } from "@/components/common/StateView";
 
 type ViewMode = "table" | "cards";
 
@@ -45,6 +42,14 @@ const Companies = () => {
   );
   const companies = data?.data || ([] as ICompanyList[]);
   const meta = data?.meta;
+
+  if (isLoading) {
+    return <LoadingView />;
+  }
+
+  if (error) {
+    return <ErrorView refetch={refetch} />;
+  }
 
   const handleSearch = (name: string, phone: string) => {
     setFilters((prev) => ({

@@ -52,7 +52,7 @@ export const SubscriptionActionModal = ({
     defaultValues: {
       action,
       planId: subscription?.planId,
-      status: SubscriptionStatus.ACTIVE,
+      status: SubscriptionStatus.TRIALING,
       duration: BillingInterval.MONTHLY,
     },
   });
@@ -63,14 +63,13 @@ export const SubscriptionActionModal = ({
       form.reset({
         action,
         planId: subscription?.planId || "",
-        status: SubscriptionStatus.ACTIVE,
+        status: SubscriptionStatus.TRIALING,
         duration: BillingInterval.MONTHLY,
       });
     }
   }, [open, action, subscription, form]);
 
   const onSubmit = (data: SubscriptionActionFormValues) => {
-    console.log(data);
     if (action === "CREATE") {
       createSubscription.mutate(
         {
@@ -78,7 +77,6 @@ export const SubscriptionActionModal = ({
           planId: data.planId!, // Validated by schema
           status: data.status!,
           duration: data.duration,
-          trialEndsAt: data.trialEndsAt!,
         },
         {
           onSuccess: () => onClose(),

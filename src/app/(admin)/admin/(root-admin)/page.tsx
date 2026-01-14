@@ -18,15 +18,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDashboardStatsMock } from "@/hooks/useDashboard";
 import { useGetAnalytics } from "@/api/analytics/api.analytics";
 
 const Dashboard = () => {
-  const { data: analytics, isLoading, isError } = useGetAnalytics();
-  const { data: stats, isLoading: isLoadingStats } = useDashboardStatsMock();
+  const { data: response, isLoading, isError } = useGetAnalytics();
+  const analytics = response?.data;
 
-  console.log("analytics", JSON.stringify(analytics));
-  if (isLoadingStats || isLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
@@ -44,6 +42,13 @@ const Dashboard = () => {
     );
   }
 
+  const getStatusCount = (status: string) => {
+    return (
+      analytics?.subscriptionsByStatus.find((s) => s.status === status)
+        ?.count || 0
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -55,25 +60,25 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Companies"
-          value={stats?.totalCompanies || 0}
+          value={analytics?.totalCompanies || 0}
           icon={Building2}
           description="Registered companies"
         />
         <StatsCard
           title="Total Users"
-          value={stats?.totalUsers || 0}
+          value={analytics?.totalUsers || 0}
           icon={Users}
           description="Across all companies"
         />
         <StatsCard
           title="Active Subscriptions"
-          value={stats?.subscriptionBreakdown.active || 0}
+          value={getStatusCount("ACTIVE")}
           icon={CheckCircle}
           description="Currently active"
         />
         <StatsCard
           title="Trial Users"
-          value={stats?.subscriptionBreakdown.trialing || 0}
+          value={getStatusCount("TRIALING")}
           icon={Clock}
           description="In trial period"
         />
@@ -94,9 +99,7 @@ const Dashboard = () => {
                 <CheckCircle className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
-                  {stats?.subscriptionBreakdown.active}
-                </p>
+                <p className="text-2xl font-bold">{getStatusCount("ACTIVE")}</p>
                 <p className="text-sm text-muted-foreground">Active</p>
               </div>
             </div>
@@ -106,7 +109,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {stats?.subscriptionBreakdown.trialing}
+                  {getStatusCount("TRIALING")}
                 </p>
                 <p className="text-sm text-muted-foreground">Trialing</p>
               </div>
@@ -117,7 +120,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {stats?.subscriptionBreakdown.expired}
+                  {getStatusCount("EXPIRED")}
                 </p>
                 <p className="text-sm text-muted-foreground">Expired</p>
               </div>
@@ -128,7 +131,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {stats?.subscriptionBreakdown.canceled}
+                  {getStatusCount("CANCELED")}
                 </p>
                 <p className="text-sm text-muted-foreground">Canceled</p>
               </div>

@@ -10,7 +10,6 @@ export const subscriptionActionSchema = z
     planId: z.string().optional(),
     status: z.nativeEnum(SubscriptionStatus).optional(),
     duration: z.nativeEnum(BillingInterval),
-    trialEndsAt: z.date().optional(),
   })
   .superRefine((data, ctx) => {
     // 1. Validation for CREATE action
@@ -20,14 +19,6 @@ export const subscriptionActionSchema = z
           code: z.ZodIssueCode.custom,
           path: ["planId"],
           message: "Plan is required",
-        });
-      }
-
-      if (data.status === SubscriptionStatus.TRIALING && !data.trialEndsAt) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["trialEndsAt"],
-          message: "Trial end date is required",
         });
       }
 

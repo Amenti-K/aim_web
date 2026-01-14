@@ -48,3 +48,22 @@ export interface SingleBarChart {
 export interface BarChartResponse {
   chartData: SingleBarChart[];
 }
+
+// Admin Analytics Interfaces
+export interface SubscriptionStatusCount {
+  status: string;
+  count: number;
+}
+
+export interface SubscriptionPlanCount {
+  planId: string;
+  planName: string;
+  count: number;
+}
+
+export interface AdminAnalyticsResponse {
+  totalCompanies: number;
+  totalUsers: number;
+  subscriptionsByStatus: SubscriptionStatusCount[];
+  subscriptionsByPlan: SubscriptionPlanCount[];
+}

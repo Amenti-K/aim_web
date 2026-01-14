@@ -12,26 +12,22 @@ import { CompanySubscriptionCard } from "@/components/company/CompanySubscriptio
 import { CompanyLimitsCard } from "@/components/company/CompanyLimitsCard";
 import { CompanyFeaturesCard } from "@/components/company/CompanyFeaturesCard";
 import { SubscriptionActions } from "@/components/company/SubscriptionActions";
+import { ErrorView, LoadingView } from "@/components/common/StateView";
 
 const CompanyDetail = () => {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
 
-  const { data, isLoading, error } = useFetchCompany(id);
+  const { data, isLoading, error, refetch } = useFetchCompany(id);
   const company = data?.data;
   const owner = company?.owner;
 
-  if (!isLoading && error) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-40" />
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
-        </div>
-      </div>
-    );
+  if (isLoading) {
+    return <LoadingView />;
+  }
+  if (error) {
+    return <ErrorView refetch={refetch} />;
   }
 
   if (!company) {
@@ -47,15 +43,6 @@ const CompanyDetail = () => {
 
   return (
     <div className="space-y-6">
-      <Button
-        variant="ghost"
-        onClick={() => router.push("/companies")}
-        className="mb-4"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Companies
-      </Button>
-
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="rounded-lg bg-primary/10 p-3">

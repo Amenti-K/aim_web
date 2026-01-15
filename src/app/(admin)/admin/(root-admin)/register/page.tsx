@@ -124,7 +124,7 @@ Password: ${successData.password}
             <Button
               className="w-full flex-1"
               variant="secondary"
-              onClick={() => router.push("/admin/")}
+              onClick={() => router.push("/admin")}
             >
               Go to Dashboard
             </Button>

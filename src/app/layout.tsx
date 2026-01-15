@@ -2,7 +2,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { Provider } from "react-redux";
 import store from "@/redux/store";
 

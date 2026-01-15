@@ -1,4 +1,12 @@
-import { LayoutDashboard, Building2, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Building2,
+  LogOut,
+  Shield,
+  ChevronUp,
+  User2,
+  UserRoundPlus,
+} from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -6,14 +14,18 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAppSelector } from "@/redux/hooks";
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/slices/authSlice";
@@ -21,7 +33,6 @@ import { logout } from "@/redux/slices/authSlice";
 const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Companies", url: "/admin/company", icon: Building2 },
-  // { title: "Register", url: "/admin/register", icon: Building2 },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -29,41 +40,58 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { admin } = useAppSelector((state) => state.adminAuth);
 
   return (
-    <Sidebar {...props}>
-      <SidebarHeader className="border-b px-6 py-4">
-        <h1 className="text-xl font-bold text-foreground">ERP Admin</h1>
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader className="border-b border-sidebar-border bg-sidebar px-4 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+            <Shield className="size-5" />
+          </div>
+          <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
+            <span className="font-semibold text-foreground">AIM Admin</span>
+            <span className="text-xs text-muted-foreground">Panel</span>
+          </div>
+        </div>
       </SidebarHeader>
-      <SidebarContent>
+
+      <SidebarContent className="p-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-2">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    className="h-10 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                  >
                     <NavLink
                       to={item.url}
                       end={item.url === "/admin"}
-                      className="flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      className="flex w-full items-center gap-4 rounded-md p-2 transition-all hover:bg-sidebar-accent/50"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm"
                     >
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className="size-5" />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
               {admin?.isSuper && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip="Register Admin"
+                    className="h-10 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                  >
                     <NavLink
                       to="/admin/register"
-                      end={"/admin/register" === "/admin/register"}
-                      className="flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      end={true}
+                      className="flex w-full items-center gap-4 rounded-md p-2 transition-all hover:bg-sidebar-accent/50"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm"
                     >
-                      <Building2 className="h-4 w-4" />
-                      <span>Register</span>
+                      <UserRoundPlus className="size-5" />
+                      <span>Register Admin</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -72,27 +100,49 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t p-4">
-        <div className="flex flex-col gap-3">
-          {admin && (
-            <div className="px-2">
-              <p className="text-sm font-medium text-foreground">
-                {admin.name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {admin.phoneNumber}
-              </p>
-            </div>
-          )}
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={() => dispatch(logout())}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
-        </div>
+
+      <SidebarFooter className="border-t border-sidebar-border p-2">
+        {admin && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    size="lg"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  >
+                    <div className="flex flex-1 items-center gap-3 overflow-hidden text-left">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-foreground">
+                        <User2 className="size-4" />
+                      </div>
+                      <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                        <span className="truncate font-semibold text-foreground">
+                          {admin.name}
+                        </span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {admin.phoneNumber}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="top"
+                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                >
+                  <DropdownMenuItem
+                    onClick={() => dispatch(logout())}
+                    className="text-destructive focus:text-destructive cursor-pointer gap-2"
+                  >
+                    <LogOut className="size-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

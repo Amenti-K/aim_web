@@ -6,6 +6,7 @@ import {
   ChevronUp,
   User2,
   UserRoundPlus,
+  CreditCard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -33,6 +34,7 @@ import { logout } from "@/redux/slices/authSlice";
 const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Companies", url: "/admin/company", icon: Building2 },
+  { title: "Plans", url: "/admin/plans", icon: CreditCard },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

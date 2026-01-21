@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/card";
 import { useAdminLogin } from "@/api/admin/api.auth";
 import { SignInInput, signInSchema } from "@/components/schema/auth.schema";
-import SubmitButton from "@/components/forms/SubmitButton";
-import TextField from "@/components/forms/TextField";
+import SubmitButton from "@/components/forms/fields/SubmitButton";
+import TextField from "@/components/forms/fields/TextField";
 
 const Login = () => {
   const router = useRouter();

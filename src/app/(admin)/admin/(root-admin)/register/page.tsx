@@ -13,14 +13,14 @@ import {
 } from "@/components/ui/card";
 import { useRegisterAdmin } from "@/api/admin/api.auth";
 import { RegisterInput, registerSchema } from "@/components/schema/auth.schema";
-import SubmitButton from "@/components/forms/SubmitButton";
-import TextField from "@/components/forms/TextField";
+import SubmitButton from "@/components/forms/fields/SubmitButton";
+import TextField from "@/components/forms/fields/TextField";
 import { IRegisterAdmin } from "@/components/interface/admin/admin.interface";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, Copy, RefreshCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import SwitchField from "@/components/forms/SwitchField";
+import SwitchField from "@/components/forms/fields/SwitchField";
 
 const RegisterAdmin = () => {
   const router = useRouter();

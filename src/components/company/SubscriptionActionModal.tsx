@@ -23,7 +23,7 @@ import {
   useCreateSubscription,
 } from "@/api/subscription/api.subscription";
 import { useEffect } from "react";
-import SelectField from "@/components/forms/SelectField";
+import SelectField from "@/components/forms/fields/SelectField";
 
 interface Props {
   open: boolean;
@@ -80,7 +80,7 @@ export const SubscriptionActionModal = ({
         },
         {
           onSuccess: () => onClose(),
-        }
+        },
       );
     } else {
       // ACTIVATE or EXTEND
@@ -92,7 +92,7 @@ export const SubscriptionActionModal = ({
         },
         {
           onSuccess: () => onClose(),
-        }
+        },
       );
     }
   };
@@ -123,8 +123,8 @@ export const SubscriptionActionModal = ({
             {action === "CREATE"
               ? "Create Subscription"
               : action === "ACTIVATE"
-              ? "Activate Subscription"
-              : "Extend Subscription"}
+                ? "Activate Subscription"
+                : "Extend Subscription"}
           </DialogTitle>
         </DialogHeader>
 

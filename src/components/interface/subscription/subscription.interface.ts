@@ -56,31 +56,13 @@ export enum BillingInterval {
 }
 
 export interface PlanLimit {
-  metric: string;
+  metric: LimitMetric;
   value: number | null; // null for unlimited
 }
 
 export interface PlanFeature {
   feature: FeatureKey;
   enabled: boolean;
-}
-
-export enum FeatureKey {
-  ACCOUNT = "ACCOUNT",
-  ANALYTICS = "ANALYTICS",
-  AUTH = "AUTH",
-  COMPANY = "COMPANY",
-  EMPLOYEE = "EMPLOYEE",
-  EXPENSE = "EXPENSE",
-  INVENTORY = "INVENTORY",
-  INVENTORY_ADJUSTMENT = "INVENTORY_ADJUSTMENT",
-  LOAN = "LOAN",
-  PARTNER = "PARTNER",
-  PURCHASE = "PURCHASE",
-  ROLE = "ROLE",
-  SALE = "SALE",
-  SUBSCRIPTION = "SUBSCRIPTION",
-  REPORTS = "REPORTS",
 }
 
 export interface ICancelSubscription {
@@ -100,3 +82,43 @@ export interface IActivateSubscription extends ICancelSubscription {
 }
 
 export type SubscriptionAction = "CREATE" | "ACTIVATE" | "EXTEND";
+
+export enum FeatureKey {
+  ACCOUNT = "ACCOUNT",
+  ANALYTICS = "ANALYTICS",
+  AUTH = "AUTH",
+  COMPANY = "COMPANY",
+  EMPLOYEE = "EMPLOYEE",
+  EXPENSE = "EXPENSE",
+  INVENTORY = "INVENTORY",
+  INVENTORY_ADJUSTMENT = "INVENTORY_ADJUSTMENT",
+  LOAN = "LOAN",
+  PARTNER = "PARTNER",
+  PURCHASE = "PURCHASE",
+  REPORTS = "REPORTS",
+  ROLE = "ROLE",
+  SALE = "SALE",
+  SUBSCRIPTION = "SUBSCRIPTION",
+  WAREHOUSE = "WAREHOUSE",
+}
+
+export enum LimitMetric {
+  ACCOUNT = "ACCOUNT",
+  ANALYTICS = "ANALYTICS",
+  AUTH = "AUTH",
+  COMPANY = "COMPANY",
+  EMPLOYEE = "EMPLOYEE",
+  EXPENSE = "EXPENSE",
+  INVENTORY = "INVENTORY",
+  INVENTORY_ADJUSTMENT = "INVENTORY_ADJUSTMENT",
+  LOAN = "LOAN",
+  PARTNER = "PARTNER",
+  PURCHASE = "PURCHASE",
+  REPORTS = "REPORTS",
+  ROLE = "ROLE",
+  SALE = "SALE",
+  SUBSCRIPTION = "SUBSCRIPTION",
+  WAREHOUSE = "WAREHOUSE",
+  INVOICES_MONTHLY = "INVOICES_MONTHLY",
+  STORAGE_GB = "STORAGE_GB",
+}

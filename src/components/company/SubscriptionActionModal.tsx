@@ -40,9 +40,10 @@ export const SubscriptionActionModal = ({
   subscription,
   companyId,
 }: Props) => {
-  const { data: planOptions } = useFetchPlans();
+  const { data } = useFetchPlans();
   const createSubscription = useCreateSubscription();
   const activateSubscription = useActivateSubscription();
+  const planOptions = data?.data;
 
   const isPending =
     createSubscription.isPending || activateSubscription.isPending;

@@ -13,3 +13,10 @@ export interface ICompanyList {
 export interface ICompany extends ICompanyList {
   usages: IUsage[] | null;
 }
+
+export interface ICompanyFilterDto {
+  page: number;
+  limit: number;
+  name?: string;
+  ownerPhone?: string;
+}

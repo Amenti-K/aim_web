@@ -16,8 +16,10 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useFetchCompanies } from "@/api/company/api.company";
-import { CompanyFilterDto } from "@/types";
-import { ICompanyList } from "@/components/interface/company/company.interface";
+import {
+  ICompanyFilterDto,
+  ICompanyList,
+} from "@/components/interface/company/company.interface";
 import { useRouter } from "next/navigation";
 import { ErrorView, LoadingView } from "@/components/common/StateView";
 
@@ -27,7 +29,7 @@ const Companies = () => {
   const router = useRouter();
 
   const [viewMode, setViewMode] = useState<ViewMode>("table");
-  const [filters, setFilters] = useState<CompanyFilterDto>({
+  const [filters, setFilters] = useState<ICompanyFilterDto>({
     page: 1,
     limit: 10,
     name: "",
@@ -38,7 +40,7 @@ const Companies = () => {
     filters.page,
     filters.limit,
     filters.name,
-    filters.ownerPhone
+    filters.ownerPhone,
   );
   const companies = data?.data || ([] as ICompanyList[]);
   const meta = data?.meta;

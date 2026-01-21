@@ -1,24 +1,5 @@
 "use client";
 
-import {
-  Building2,
-  Users,
-  CheckCircle,
-  Clock,
-  XCircle,
-  AlertCircle,
-} from "lucide-react";
-import { StatsCard } from "@/components/StatsCard";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useDashboardStatsMock } from "@/hooks/useDashboard";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 

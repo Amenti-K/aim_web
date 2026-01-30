@@ -15,7 +15,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useFetchCompanies } from "@/api/company/api.company";
+import {
+  useAttachCashAccount,
+  useFetchCompanies,
+} from "@/api/company/api.company";
 import {
   ICompanyFilterDto,
   ICompanyList,
@@ -27,6 +30,7 @@ type ViewMode = "table" | "cards";
 
 const Companies = () => {
   const router = useRouter();
+  const attachCashAccount = useAttachCashAccount();
 
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [filters, setFilters] = useState<ICompanyFilterDto>({
@@ -74,6 +78,10 @@ const Companies = () => {
     // router.push(router.pathname + "/" + id);
   };
 
+  const handleFixCompanies = () => {
+    attachCashAccount.mutate({} as JSON);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -84,6 +92,13 @@ const Companies = () => {
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-md border p-1">
+          {/* <Button
+            variant="link"
+            // size="sm"
+            onClick={handleFixCompanies}
+          >
+            Fix Companies
+          </Button> */}
           <Button
             variant={viewMode === "table" ? "secondary" : "ghost"}
             size="sm"

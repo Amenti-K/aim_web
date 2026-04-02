@@ -29,6 +29,9 @@ const endpoints = {
   ADMINANALYTICS: "/anaytics/admin",
   PIECHART: "/anaytics/piechart",
   PROFIT: "/anaytics/profit",
+
+  MAIL: "/mail",
+  MAILCONTACT: "/mail/contact",
 };
 
 export default endpoints;

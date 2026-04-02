@@ -1,16 +1,25 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Check, HelpCircle, Zap, ShieldCheck, Globe, ArrowRight } from "lucide-react";
+import {
+  Check,
+  HelpCircle,
+  Zap,
+  ShieldCheck,
+  Globe,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const PLANS = [
   {
     name: "Starter",
     price: { monthly: 29, yearly: 290 },
-    description: "Perfect for small warehouses looking to digitize their inventory.",
+    description:
+      "Perfect for small warehouses looking to digitize their inventory.",
     features: [
       "Up to 500 SKUs",
       "2 User Licenses",
@@ -24,7 +33,8 @@ const PLANS = [
   {
     name: "Professional",
     price: { monthly: 99, yearly: 990 },
-    description: "Advanced features for growing businesses with multiple locations.",
+    description:
+      "Advanced features for growing businesses with multiple locations.",
     features: [
       "Unlimited SKUs",
       "10 User Licenses",
@@ -39,7 +49,8 @@ const PLANS = [
   {
     name: "Enterprise",
     price: { monthly: "Custom", yearly: "Custom" },
-    description: "Tailored solutions for large-scale operations and global enterprises.",
+    description:
+      "Tailored solutions for large-scale operations and global enterprises.",
     features: [
       "Custom User Licenses",
       "Dedicated Account Manager",
@@ -56,19 +67,21 @@ const PLANS = [
 const FAQS = [
   {
     question: "Can I switch plans later?",
-    answer: "Yes, you can upgrade or downgrade your plan at any time from your account settings.",
+    answer:
+      "Yes, you can upgrade or downgrade your plan at any time from your account settings.",
   },
   {
     question: "Do you offer a free trial?",
-    answer: "We offer a 14-day free trial for both Starter and Professional plans. No credit card required.",
+    answer: "We offer a 30-day free trial for Starter plan.",
   },
   {
     question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards, PayPal, and wire transfers for Enterprise customers.",
+    answer: "We accept CBE,Telebirr,Bank Of Abyssinia",
   },
   {
     question: "Is my data secure?",
-    answer: "Absolutely. We use enterprise-grade encryption and follow industry best practices for data security.",
+    answer:
+      "Absolutely. We use enterprise-grade encryption and follow industry best practices for data security.",
   },
 ];
 
@@ -90,15 +103,24 @@ export default function PricingPage() {
             <span>Transparent Pricing</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-            Simple Plans for <span className="text-primary">Every Business</span>
+            Simple Plans for{" "}
+            <span className="text-primary">Every Business</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Choose the plan that's right for you. All plans include core ERP features to help you scale efficiently.
+            Choose the plan that's right for you. All plans include core ERP
+            features to help you scale efficiently.
           </p>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center space-x-4">
-            <span className={cn("text-sm font-medium", !isYearly ? "text-foreground" : "text-muted-foreground")}>Monthly</span>
+            <span
+              className={cn(
+                "text-sm font-medium",
+                !isYearly ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              Monthly
+            </span>
             <button
               onClick={() => setIsYearly(!isYearly)}
               className="relative w-14 h-7 bg-muted rounded-full p-1 transition-colors hover:bg-primary/20 focus:outline-none"
@@ -108,8 +130,16 @@ export default function PricingPage() {
                 className="w-5 h-5 bg-primary rounded-full shadow-lg"
               />
             </button>
-            <span className={cn("text-sm font-medium", isYearly ? "text-foreground" : "text-muted-foreground")}>
-              Yearly <span className="text-primary text-xs font-bold ml-1">(Save 20%)</span>
+            <span
+              className={cn(
+                "text-sm font-medium",
+                isYearly ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              Yearly{" "}
+              <span className="text-primary text-xs font-bold ml-1">
+                (Save 20%)
+              </span>
             </span>
           </div>
         </motion.div>
@@ -127,7 +157,9 @@ export default function PricingPage() {
               transition={{ delay: idx * 0.1, duration: 0.5 }}
               className={cn(
                 "relative flex flex-col p-8 rounded-3xl border bg-card/50 backdrop-blur-sm transition-all hover:shadow-2xl hover:shadow-primary/5",
-                plan.popular ? "border-primary shadow-xl shadow-primary/10 ring-2 ring-primary/20" : "border-border/50"
+                plan.popular
+                  ? "border-primary shadow-xl shadow-primary/10 ring-2 ring-primary/20"
+                  : "border-border/50",
               )}
             >
               {plan.popular && (
@@ -135,19 +167,27 @@ export default function PricingPage() {
                   Most Popular
                 </div>
               )}
-              
+
               <div className="mb-8">
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{plan.description}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {plan.description}
+                </p>
               </div>
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-bold">
-                    {typeof plan.price === "string" ? plan.price : isYearly ? `$${plan.price.yearly}` : `$${plan.price.monthly}`}
+                    {typeof plan.price === "string"
+                      ? plan.price
+                      : isYearly
+                        ? `$${plan.price.yearly}`
+                        : `$${plan.price.monthly}`}
                   </span>
                   {typeof plan.price !== "string" && (
-                    <span className="text-muted-foreground font-medium">/{isYearly ? "year" : "month"}</span>
+                    <span className="text-muted-foreground font-medium">
+                      /{isYearly ? "year" : "month"}
+                    </span>
                   )}
                 </div>
               </div>
@@ -158,16 +198,20 @@ export default function PricingPage() {
                     <div className="mt-1 bg-primary/10 rounded-full p-0.5">
                       <Check className="w-4 h-4 text-primary" />
                     </div>
-                    <span className="text-sm text-muted-foreground font-medium">{feature}</span>
+                    <span className="text-sm text-muted-foreground font-medium">
+                      {feature}
+                    </span>
                   </div>
                 ))}
               </div>
 
-              <Button 
+              <Button
                 variant={plan.popular ? "default" : "outline"}
                 className={cn(
                   "w-full h-12 text-lg rounded-xl font-bold transition-all",
-                  plan.popular ? "bg-primary hover:bg-primary/90 text-white" : "hover:bg-primary/5 hover:text-primary hover:border-primary/50"
+                  plan.popular
+                    ? "bg-primary hover:bg-primary/90 text-white"
+                    : "hover:bg-primary/5 hover:text-primary hover:border-primary/50",
                 )}
               >
                 {plan.cta}
@@ -180,10 +224,14 @@ export default function PricingPage() {
       {/* Trust Badges */}
       <section className="container mx-auto px-4 py-12 border-y border-border/50">
         <div className="flex flex-wrap justify-center gap-12 md:gap-24 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-           {/* Mock Trust Icons */}
-           <div className="flex items-center gap-2 font-bold text-xl"><ShieldCheck className="text-primary" /> SecurePay</div>
-           <div className="flex items-center gap-2 font-bold text-xl"><Globe className="text-primary" /> GlobalSync</div>
-           <div className="flex items-center gap-2 font-bold text-xl"><Zap className="text-primary" /> FastFlow</div>
+          {/* Mock Trust Icons */}
+          <div className="flex items-center gap-2 font-bold text-xl">
+            <ShieldCheck className="text-primary" /> SecurePay
+          </div>
+          {/* <div className="flex items-center gap-2 font-bold text-xl"><Globe className="text-primary" /> GlobalSync</div> */}
+          <div className="flex items-center gap-2 font-bold text-xl">
+            <Zap className="text-primary" /> FastFlow
+          </div>
         </div>
       </section>
 
@@ -191,8 +239,12 @@ export default function PricingPage() {
       <section className="container mx-auto px-4 md:px-6 max-w-4xl">
         <div className="text-center mb-16">
           <HelpCircle className="w-12 h-12 text-primary mx-auto mb-4 opacity-50" />
-          <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
-          <p className="text-muted-foreground">Everything you need to know about our plans and billing.</p>
+          <h2 className="text-3xl font-bold mb-4">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-muted-foreground">
+            Everything you need to know about our plans and billing.
+          </p>
         </div>
 
         <div className="grid gap-6">
@@ -221,17 +273,25 @@ export default function PricingPage() {
         <div className="bg-primary p-12 lg:p-20 rounded-[3rem] text-white text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 blur-3xl rounded-full -translate-x-1/2 translate-y-1/2" />
-          
+
           <div className="relative z-10 space-y-8 max-w-3xl mx-auto">
-            <h2 className="text-4xl lg:text-5xl font-bold">Still have questions?</h2>
+            <h2 className="text-4xl lg:text-5xl font-bold">
+              Still have questions?
+            </h2>
             <p className="text-xl text-primary-foreground/90">
-              Our team is ready to help you find the best plan for your business needs. 
-              Get in touch with us today.
+              Our team is ready to help you find the best plan for your business
+              needs. Get in touch with us today.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" variant="secondary" className="h-14 px-8 text-lg rounded-xl font-bold flex items-center gap-2">
-                Talk to Sales <ArrowRight size={18} />
-              </Button>
+              <Link href="/contact">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-14 px-8 text-lg rounded-xl font-bold flex items-center gap-2"
+                >
+                  Talk to Sales <ArrowRight size={18} />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

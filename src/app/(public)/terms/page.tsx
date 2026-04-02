@@ -1,7 +1,13 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ShieldCheck, Scale, AlertTriangle, FileText, CheckCircle } from "lucide-react";
+import {
+  ShieldCheck,
+  Scale,
+  AlertTriangle,
+  FileText,
+  CheckCircle,
+} from "lucide-react";
 
 export default function TermsPage() {
   const lastUpdated = "March 30, 2026";
@@ -10,28 +16,33 @@ export default function TermsPage() {
     {
       icon: <CheckCircle className="text-primary" />,
       title: "1. Acceptance of Terms",
-      content: "By accessing or using the AIM Stock ERP platform, mobile application, or any associated service, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, you may not use the services."
+      content:
+        "By accessing or using the AIM Stock ERP platform, mobile application, or any associated service, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, you may not use the services.",
     },
     {
       icon: <FileText className="text-primary" />,
       title: "2. Description of Service",
-      content: "AIM Stock is a business-to-business (B2B) inventory and stock management tool. It provides tracking for inventory levels, sales, purchases, warehouse logistics, and internal reporting. AIM Stock is NOT a financial institution and does NOT provide banking or direct investment services."
+      content:
+        "AIM Stock is a business-to-business (B2B) inventory and stock management tool. It provides tracking for inventory levels, sales, purchases, warehouse logistics, and internal reporting. AIM Stock is NOT a financial institution and does NOT provide banking or direct investment services.",
     },
     {
       icon: <ShieldCheck className="text-primary" />,
       title: "3. User Responsibilities",
-      content: "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to provide accurate and complete data relating to your business assets and inventory records."
+      content:
+        "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.",
     },
     {
       icon: <AlertTriangle className="text-orange-500" />,
       title: "4. Prohibited Uses",
-      content: "You may not use AIM Stock for any illegal activities, including but not limited to tracking restricted or stolen goods, money laundering, or violating any trade regulations. Misuse of the platform will lead to immediate account termination."
+      content:
+        "You may not use AIM Stock for any illegal activities, including but not limited to tracking restricted or stolen goods, money laundering, or violating any trade regulations. Misuse of the platform will lead to immediate account termination.",
     },
     {
       icon: <Scale className="text-primary" />,
       title: "5. Limitation of Liability",
-      content: "While we strive for 99.9% uptime and data accuracy, AIM Stock is provided on an 'as is' basis. We are not liable for any business losses, data inaccuracies resulting from user input, or temporary system outages that may occur during maintenance."
-    }
+      content:
+        "While we strive for 99.9% uptime and data accuracy, AIM Stock is provided on an 'as is' basis. We are not liable for any business losses, data inaccuracies resulting from user input, or temporary system outages that may occur during maintenance.",
+    },
   ];
 
   return (
@@ -60,8 +71,9 @@ export default function TermsPage() {
           transition={{ delay: 0.2 }}
           className="text-xl text-muted-foreground leading-relaxed"
         >
-          Please read these terms carefully before starting your journey with AIM Stock. 
-          They define your rights and responsibilities as a user of our ERP platform.
+          Please read these terms carefully before starting your journey with
+          AIM Stock. They define your rights and responsibilities as a user of
+          our ERP platform.
         </motion.p>
         <div className="text-sm text-muted-foreground pt-4">
           Last Updated: {lastUpdated}
@@ -93,7 +105,8 @@ export default function TermsPage() {
         <div className="p-12 bg-primary text-white rounded-[2.5rem] shadow-2xl mt-16 text-center space-y-6">
           <h2 className="text-3xl font-bold">Still have questions?</h2>
           <p className="text-white/80 text-lg">
-            Our legal and support teams are available to clarify any part of these terms.
+            Our legal and support teams are available to clarify any part of
+            these terms.
           </p>
           <div className="flex justify-center gap-4">
             <button className="px-8 py-3 bg-white text-primary rounded-xl font-bold shadow-xl hover:scale-105 transition-transform active:scale-95">

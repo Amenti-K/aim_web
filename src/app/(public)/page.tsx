@@ -15,8 +15,10 @@ import {
   Boxes,
   ClipboardCheck,
   CreditCard,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FaGooglePlay } from "react-icons/fa";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -86,34 +88,41 @@ export default function LandingPage() {
             >
               <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
                 <Zap size={14} className="fill-primary" />
+                {/* <span>Mobile-First ERP System</span> */}
                 <span>Modern ERP for Enterprises</span>
               </div>
+              {/* <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] text-foreground">
+                Manage Your <span className="text-primary">Business</span>{" "}
+                <br /> From Your Phone.
+              </h1> */}
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] text-foreground">
                 Revolutionize Your <span className="text-primary">Stock</span>{" "}
                 <br /> Management.
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-                AIM Stock is the ultimate cloud-native ERP solution designed to
-                give you total control over your inventory, financials, and
-                operations with AI-powered insights.
+                AIM Stock is the ultimate ERP solution for businesses of all
+                sizes, helping you streamline inventory management, track
+                financial performance, and run operations with confidence
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
-                <Link href="/admin">
+                <Link href="/download/apk">
                   <Button
                     size="lg"
-                    className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/30 transition-all hover:scale-105 active:scale-95"
+                    className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-white shadow-xl"
                   >
-                    Start Your Free Trial
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <Download />
+                    Download APK
                   </Button>
                 </Link>
-                <Link href="/services">
+
+                <Link href="https://play.google.com/store/apps/details?id=your.app.id">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="h-14 px-8 text-lg hover:bg-secondary"
+                    className="h-14 px-8 text-lg flex items-center gap-2"
                   >
-                    Watch Demo
+                    <FaGooglePlay />
+                    Play Store
                   </Button>
                 </Link>
               </div>
@@ -138,22 +147,36 @@ export default function LandingPage() {
               className="relative hidden lg:block"
             >
               <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
-              <div className="relative bg-card border border-border shadow-2xl rounded-3xl overflow-hidden p-2 aspect-[4/3] group transition-transform hover:-translate-y-2">
-                {/* Mock UI Representation */}
-                <div className="w-full h-full bg-muted/30 rounded-2xl p-6 flex flex-col gap-6">
-                  <div className="h-4 w-1/3 bg-background rounded-full animate-pulse" />
-                  <div className="grid grid-cols-3 gap-4">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="h-24 bg-card rounded-xl border border-border/50 shadow-sm"
-                      />
-                    ))}
-                  </div>
-                  <div className="flex-1 bg-card rounded-xl border border-border/50 shadow-sm p-4 space-y-4">
-                    <div className="h-2 w-full bg-muted rounded-full" />
-                    <div className="h-2 w-5/6 bg-muted rounded-full" />
-                    <div className="h-2 w-4/6 bg-muted rounded-full" />
+              <div className="relative flex justify-center">
+                <div className="w-[260px] h-[520px] bg-black rounded-[2.5rem] p-2 shadow-2xl border border-border">
+                  {/* Screen */}
+                  <div className="w-full h-full bg-muted/30 rounded-[2rem] p-4 flex flex-col gap-4">
+                    {/* Top bar */}
+                    <div className="h-3 w-1/3 bg-background rounded-full" />
+
+                    {/* Cards */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className="h-20 bg-card rounded-xl border border-border/50"
+                        />
+                      ))}
+                    </div>
+
+                    {/* Activity */}
+                    <div className="flex-1 bg-card rounded-xl border border-border/50 p-3 space-y-2">
+                      <div className="h-2 w-full bg-muted rounded-full" />
+                      <div className="h-2 w-5/6 bg-muted rounded-full" />
+                      <div className="h-2 w-3/4 bg-muted rounded-full" />
+                    </div>
+
+                    {/* Bottom nav */}
+                    <div className="h-10 bg-background rounded-xl flex justify-around items-center">
+                      <div className="w-5 h-5 bg-muted rounded" />
+                      <div className="w-5 h-5 bg-muted rounded" />
+                      <div className="w-5 h-5 bg-muted rounded" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -213,8 +236,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-muted-foreground text-lg max-w-2xl mx-auto"
           >
-            Everything you need to manage your business effectively, from
-            tracking inventory levels to complex financial reporting.
+            AIM Stock gives you simple tools to manage stock, sales, purchases,
+            and expenses, all in one mobile app.
           </motion.p>
         </div>
 
@@ -250,51 +273,27 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* Trust / Stats Section */}
-      <section className="bg-foreground text-background py-24 rounded-[3rem] mx-4 relative overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 blur-[120px] rounded-full" />
-        <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
-            {[
-              { label: "Active Businesses", value: "500+" },
-              { label: "Assets Tracked", value: "1.2M+" },
-              { label: "Daily Transactions", value: "50K+" },
-              { label: "System Uptime", value: "99.9%" },
-            ].map((stat, i) => (
-              <div key={i} className="space-y-2">
-                <p className="text-4xl md:text-6xl font-bold text-white mb-2">
-                  {stat.value}
-                </p>
-                <p className="text-muted-foreground font-medium">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="container mx-auto px-4 md:px-6 text-center">
         <div className="max-w-4xl mx-auto p-12 lg:p-24 bg-card border border-border shadow-2xl rounded-[3rem] relative overflow-hidden">
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 blur-3xl rounded-full" />
           <div className="relative z-10 space-y-8">
             <h2 className="text-4xl lg:text-6xl font-bold">
-              Ready to take control of your warehouse?
+              Ready to take control of your warehouses?
             </h2>
             <p className="text-xl text-muted-foreground">
-              Join hundreds of enterprises that have optimized their operations
-              with AIM Stock ERP.
+              Join enterprises that have optimized their operations with AIM
+              Stock ERP.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/admin">
+              {/* <Link href="/admin">
                 <Button
                   size="lg"
                   className="h-16 px-12 text-xl bg-primary hover:bg-primary/90 text-white rounded-full"
                 >
                   Get Started Free
                 </Button>
-              </Link>
+              </Link> */}
               <Link href="/contact">
                 <Button
                   size="lg"

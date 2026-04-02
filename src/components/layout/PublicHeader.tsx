@@ -1,19 +1,22 @@
 "use client";
 
+import logo from "@/../public/adaptivelogo.png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useScroll, useTransform } from "motion/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { AIMSTOCK_DATA } from "@/lib/data";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/" },
-  { label: "Services", href: "/services" },
-  { label: "Pricing", href: "/pricing" },
   { label: "About", href: "/about" },
+  { label: "Features", href: "/features" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -21,23 +24,23 @@ export const PublicHeader = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const { scrollY } = useScroll();
-  
+
   const headerBg = useTransform(
     scrollY,
     [0, 50],
-    ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.8)"]
+    ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.8)"],
   );
-  
+
   const headerBorder = useTransform(
     scrollY,
     [0, 50],
-    ["rgba(255, 255, 255, 0)", "rgba(229, 231, 235, 0.1)"]
+    ["rgba(255, 255, 255, 0)", "rgba(229, 231, 235, 0.1)"],
   );
 
   const shadow = useTransform(
     scrollY,
     [0, 50],
-    ["none", "0 4px 6px -1px rgb(0 0 0 / 0.1)"]
+    ["none", "0 4px 6px -1px rgb(0 0 0 / 0.1)"],
   );
 
   return (
@@ -52,9 +55,7 @@ export const PublicHeader = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:rotate-6 transition-transform">
-              <LayoutDashboard size={24} />
-            </div>
+            <Image src={logo} alt="Logo" width={40} height={40} />
             <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
               AIM <span className="text-primary">Stock</span>
             </span>
@@ -68,7 +69,9 @@ export const PublicHeader = () => {
                 href={item.href}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-primary relative py-1",
-                  pathname === item.href ? "text-primary" : "text-muted-foreground"
+                  pathname === item.href
+                    ? "text-primary"
+                    : "text-muted-foreground",
                 )}
               >
                 {item.label}
@@ -112,7 +115,7 @@ export const PublicHeader = () => {
                 onClick={() => setIsOpen(false)}
                 className={cn(
                   "text-lg font-medium transition-colors",
-                  pathname === item.href ? "text-primary" : "text-foreground"
+                  pathname === item.href ? "text-primary" : "text-foreground",
                 )}
               >
                 {item.label}
@@ -121,7 +124,9 @@ export const PublicHeader = () => {
           </div>
           <div className="flex flex-col space-y-3 pt-6 border-t">
             <div className="flex items-center justify-between px-2">
-              <span className="text-sm font-medium text-muted-foreground">Appearance</span>
+              <span className="text-sm font-medium text-muted-foreground">
+                Appearance
+              </span>
               <ThemeToggle />
             </div>
           </div>

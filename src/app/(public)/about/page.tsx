@@ -2,32 +2,61 @@
 
 import { motion } from "motion/react";
 import { Shield, Target, Users, Zap, CheckCircle2 } from "lucide-react";
+import { match } from "assert";
+import { on } from "events";
+
+const values = [
+  {
+    title: "Simplicity",
+    desc: "We build system that are easy to use, easy to learn, and practical for real businesses.",
+    icon: <Zap className="text-primary" />,
+  },
+  {
+    title: "Reliability",
+    desc: "We ensure accurate tracking and stable performance so businesses can depend on our system every day.",
+    icon: <Shield className="text-primary" />,
+  },
+  {
+    title: "Customer Success",
+    desc: "We focus on helping businesses grow through strong support, training, and continuous improvement.",
+    icon: <Users className="text-primary" />,
+  },
+  {
+    title: "Innovation for Growth",
+    desc: "We continuously improve our solutions to match the changing needs of businesses in Ethiopia and across Africa",
+    icon: <Users className="text-primary" />,
+  },
+];
 
 export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 md:px-6 py-12 lg:py-24 space-y-24">
       {/* Hero Section */}
       <section className="text-center space-y-8 max-w-4xl mx-auto">
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-4xl md:text-6xl font-bold tracking-tight"
         >
-          Empowering Enterprises with <span className="text-primary">Precision</span>.
+          Empowering Enterprises with{" "}
+          <span className="text-primary">Precision</span>.
         </motion.h1>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="text-xl text-muted-foreground leading-relaxed"
         >
-          Built by a team of logistics and software experts, AIM Stock was created to solve the complexities of modern supply chain management. We believe that technology should simplify operations, not complicate them.
+          Built by a team of logistics and software experts, AIM Stock was
+          created to solve the complexities of modern supply chain management.
+          We believe that technology should simplify operations, not complicate
+          them.
         </motion.p>
       </section>
 
       {/* Mission & Vision */}
       <section className="grid lg:grid-cols-2 gap-12">
-        <motion.div 
+        <motion.div
           whileInView={{ opacity: 1, x: 0 }}
           initial={{ opacity: 0, x: -30 }}
           viewport={{ once: true }}
@@ -38,11 +67,13 @@ export default function AboutPage() {
           </div>
           <h2 className="text-3xl font-bold">Our Mission</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            To provide businesses with the most intuitive and powerful ERP platform that automates inventory tracking, reduces waste, and maximizes profitability through data-driven decisions.
+            To empower small and medium businesses in Ethiopia with a simple,
+            reliable, and affordable inventory management system that improves
+            control, reduces losses, and supports business growth.
           </p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           whileInView={{ opacity: 1, x: 0 }}
           initial={{ opacity: 0, x: 30 }}
           viewport={{ once: true }}
@@ -53,7 +84,9 @@ export default function AboutPage() {
           </div>
           <h2 className="text-3xl font-bold">Our Vision</h2>
           <p className="text-lg text-white/80 leading-relaxed">
-            To be the global leader in enterprise resource planning, setting the standard for seamless integration between physical assets and digital intelligence.
+            To become the most trusted and widely chosen inventory and business
+            management system for small and medium businesses in Ethiopia, and
+            to expand our impact across Africa as a leading business solution.
           </p>
         </motion.div>
       </section>
@@ -68,24 +101,8 @@ export default function AboutPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
-              title: "Innovation First",
-              desc: "We constantly push the boundaries of what's possible in cloud logistics.",
-              icon: <Zap className="text-primary" />
-            },
-            {
-              title: "Security & Trust",
-              desc: "Your data is protected by industry-leading encryption and redundant backups.",
-              icon: <Shield className="text-primary" />
-            },
-            {
-              title: "Customer Centric",
-              desc: "Every feature we build starts with a conversation with our users.",
-              icon: <Users className="text-primary" />
-            }
-          ].map((value, i) => (
-            <motion.div 
+          {values.map((value, i) => (
+            <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -100,17 +117,6 @@ export default function AboutPage() {
               <p className="text-muted-foreground">{value.desc}</p>
             </motion.div>
           ))}
-        </div>
-      </section>
-
-      {/* Team / Proof Section */}
-      <section className="rounded-3xl bg-secondary py-24 px-12 text-center space-y-12">
-        <h2 className="text-4xl font-bold">Trusted by Industry Leaders</h2>
-        <div className="flex flex-wrap justify-center gap-12 opacity-50 grayscale">
-           {/* Add logo placeholders or brand names */}
-           {["LOGISYNC", "WAREFLOW", "STOX", "QUANTUM", "NEXUS"].map(brand => (
-             <span key={brand} className="text-2xl font-black tracking-tighter">{brand}</span>
-           ))}
         </div>
       </section>
     </div>

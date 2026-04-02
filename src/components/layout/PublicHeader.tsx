@@ -1,6 +1,6 @@
 "use client";
 
-import logo from "@/../public/adaptivelogo.png";
+import logo from "@/../public/logo.png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useScroll, useTransform } from "motion/react";

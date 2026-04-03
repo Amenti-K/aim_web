@@ -4,7 +4,8 @@ import logo from "@/../public/logo.png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useScroll, useTransform } from "motion/react";
-import { useState } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
@@ -24,17 +25,32 @@ export const PublicHeader = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const { scrollY } = useScroll();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure theme is mounted to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && (resolvedTheme === "dark" || theme === "dark");
 
   const headerBg = useTransform(
     scrollY,
     [0, 50],
-    ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.8)"],
+    [
+      "rgba(255, 255, 255, 0)",
+      isDark ? "rgba(9, 9, 11, 0.8)" : "rgba(255, 255, 255, 0.8)",
+    ],
   );
 
   const headerBorder = useTransform(
     scrollY,
     [0, 50],
-    ["rgba(255, 255, 255, 0)", "rgba(229, 231, 235, 0.1)"],
+    [
+      "rgba(255, 255, 255, 0)",
+      isDark ? "rgba(39, 39, 42, 0.5)" : "rgba(229, 231, 235, 0.5)",
+    ],
   );
 
   const shadow = useTransform(

@@ -103,18 +103,19 @@ export default function ServicesPage() {
       </section>
 
       {/* Integration Section */}
-      <section className="p-12 lg:p-24 bg-foreground text-background rounded-[3rem] relative overflow-hidden">
+      <section className="p-12 lg:p-24 bg-zinc-950 text-white rounded-[3rem] relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 left-0 w-full h-full bg-linear-to-br from-primary/10 via-transparent to-transparent opacity-50" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/20 blur-[120px] rounded-full" />
         <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
-          <div className="space-y-6 text-center lg:text-left">
-            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-              Seamless mobile-to-cloud <br className="hidden md:block" />{" "}
+          <div className="space-y-8 text-center lg:text-left">
+            <h2 className="text-4xl md:text-5xl font-bold leading-tight tracking-tighter">
+              Seamless <span className="text-primary">mobile-to-cloud</span>{" "}
               integration.
             </h2>
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
+            <p className="text-lg text-zinc-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
               Manage your inventory from your pocket or your desktop. AIM Stock
-              lets you work smoothly across devices with fast updates and an
-              easy-to-use interface.
+              lets you work smoothly across devices with instant sync and an
+              interface designed for speed.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">

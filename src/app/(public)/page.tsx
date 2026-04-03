@@ -18,7 +18,7 @@ import {
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FaGooglePlay, FaTelegram } from "react-icons/fa";
+import { FaGooglePlay, FaTelegramPlane } from "react-icons/fa";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -121,7 +121,7 @@ export default function LandingPage() {
                     variant="outline"
                     className="h-14 px-8 text-lg flex items-center gap-2"
                   >
-                    <FaTelegram />
+                    <FaTelegramPlane />
                     Join The Community
                   </Button>
                 </Link>

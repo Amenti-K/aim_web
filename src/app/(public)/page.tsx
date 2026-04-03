@@ -18,7 +18,7 @@ import {
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FaGooglePlay } from "react-icons/fa";
+import { FaGooglePlay, FaTelegram } from "react-icons/fa";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -105,7 +105,7 @@ export default function LandingPage() {
                 financial performance, and run operations with confidence
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
-                <Link href="/download/apk">
+                <Link href="https://github.com/ProjectMercato/Aim_mobile/releases/download/AIM-Stock/AimStock_v1.apk">
                   <Button
                     size="lg"
                     className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-white shadow-xl"
@@ -115,7 +115,17 @@ export default function LandingPage() {
                   </Button>
                 </Link>
 
-                <Link href="https://play.google.com/store/apps/details?id=your.app.id">
+                <Link href="https://t.me/aim_technologies">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-14 px-8 text-lg flex items-center gap-2"
+                  >
+                    <FaTelegram />
+                    Join The Community
+                  </Button>
+                </Link>
+                {/* <Link href="https://play.google.com/store/apps/details?id=your.app.id">
                   <Button
                     size="lg"
                     variant="outline"
@@ -124,7 +134,7 @@ export default function LandingPage() {
                     <FaGooglePlay />
                     Play Store
                   </Button>
-                </Link>
+                </Link> */}
               </div>
               <div className="flex items-center space-x-6 pt-6 text-muted-foreground">
                 <div className="flex items-center space-x-2">

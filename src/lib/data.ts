@@ -24,7 +24,10 @@ export const AIMSTOCK_DATA = {
   productLinks: [
     { name: "Features", href: "/features" },
     { name: "Pricing", href: "/pricing" },
-    { name: "Download", href: "/download" },
+    {
+      name: "Download",
+      href: "https://github.com/ProjectMercato/Aim_mobile/releases/download/AIM-Stock/AimStock_v1.apk",
+    },
   ],
 
   supportLinks: [

@@ -26,7 +26,7 @@ export const AIMSTOCK_DATA = {
     { name: "Pricing", href: "/pricing" },
     {
       name: "Download",
-      href: "https://github.com/ProjectMercato/Aim_mobile/releases/download/AIM-Stock/AimStock_v1.apk",
+      href: "https://downloads.aimtechgroups.com/filebrowser/api/public/dl/S35lD2jF?inline=true",
     },
   ],
 

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaGooglePlay, FaTelegramPlane } from "react-icons/fa";
+import { AIMSTOCK_DATA } from "@/lib/data";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -26,13 +27,7 @@ const fadeInUp = {
   transition: { duration: 0.5 },
 };
 
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+const staggerContainer = { animate: { transition: { staggerChildren: 0.1 } } };
 
 const MODULES = [
   {
@@ -106,7 +101,11 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
                 <Link
-                  href="https://downloads.aimtechgroups.com/filebrowser/api/public/dl/S35lD2jF?inline=true"
+                  href={
+                    AIMSTOCK_DATA.productLinks.filter(
+                      (link) => link.name === "Download",
+                    )[0].href
+                  }
                   download="AimStock_v1.apk"
                 >
                   <Button

@@ -105,7 +105,10 @@ export default function LandingPage() {
                 financial performance, and run operations with confidence
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
-                <Link href="https://github.com/ProjectMercato/Aim_mobile/releases/download/AIM-Stock/AimStock_v1.apk">
+                <Link
+                  href="https://downloads.aimtechgroups.com/filebrowser/api/public/dl/S35lD2jF?inline=true"
+                  download="AimStock_v1.apk"
+                >
                   <Button
                     size="lg"
                     className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-white shadow-xl"
@@ -114,7 +117,6 @@ export default function LandingPage() {
                     Download APK
                   </Button>
                 </Link>
-
                 <Link href="https://t.me/aim_technologies">
                   <Button
                     size="lg"

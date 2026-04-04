@@ -20,15 +20,15 @@ AxiosInstance.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
-    console.log(
-      "➡️ [REQUEST]",
-      config.method?.toUpperCase(),
-      config.url,
-      config.headers
-    );
+    // console.log(
+    //   "➡️ [REQUEST]",
+    //   config.method?.toUpperCase(),
+    //   config.url,
+    //   config.headers
+    // );
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 AxiosInstance.interceptors.request.use((config) => {
@@ -44,15 +44,15 @@ AxiosInstance.interceptors.request.use((config) => {
 
 AxiosInstance.interceptors.response.use(
   (res) => {
-    console.log("✅ [RESPONSE]", res.data);
+    // console.log("✅ [RESPONSE]", res.data);
     return res;
   },
   async (error) => {
-    console.log(
-      "❌ [RESPONSE ERROR]",
-      error.response?.status,
-      error.response?.data
-    );
+    // console.log(
+    //   "❌ [RESPONSE ERROR]",
+    //   error.response?.status,
+    //   error.response?.data,
+    // );
 
     const originalRequest = error.config;
     const state = store.getState();
@@ -65,7 +65,7 @@ AxiosInstance.interceptors.response.use(
         try {
           const res = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-            { refreshToken }
+            { refreshToken },
           );
 
           const newAccessToken = res.data.accessToken;
@@ -74,17 +74,17 @@ AxiosInstance.interceptors.response.use(
           originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
           return AxiosInstance(originalRequest);
         } catch (refreshError) {
-          console.log("Refresh failed, forcing logout");
+          // console.log("Refresh failed, forcing logout");
           store.dispatch(logout());
         }
       } else {
-        console.log("No refresh token, forcing logout");
+        // console.log("No refresh token, forcing logout");
         store.dispatch(logout());
       }
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default AxiosInstance;

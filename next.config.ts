@@ -4,28 +4,7 @@ const nextConfig: NextConfig = {
   // output: "export", // Removed to allow dynamic routes without generateStaticParams
   images: {
     unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-      },
-      {
-        protocol: "https",
-        hostname: "plus.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "img.icons8.com",
-      },
-      {
-        protocol: "https",
-        hostname: "icons8.com",
-      },
-    ],
+    remotePatterns: [],
   },
   eslint: {
     // ✅ Vercel won’t fail build because of ESLint

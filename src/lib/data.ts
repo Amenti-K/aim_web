@@ -26,7 +26,7 @@ export const AIMSTOCK_DATA = {
     { name: "Pricing", href: "/pricing" },
     {
       name: "Download",
-      href: "https://downloads.aimtechgroups.com/filebrowser/api/public/dl/ccAWDqap?inline=true",
+      href: "https://downloads.aimtechgroups.com/filebrowser/api/public/dl/lqFpKe_L?inline=true",
     },
   ],
 

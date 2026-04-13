@@ -8,6 +8,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Provider } from "react-redux";
 import store from "@/redux/store";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { SubscriptionProvider } from "@/context/SubscriptionContext";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -120,9 +123,13 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {children}
+              <SubscriptionProvider>
+                {children}
+              </SubscriptionProvider>
               <Toaster />
+              <SonnerToaster position="top-right" expand={true} richColors />
             </ThemeProvider>
+
           </ReactQueryProvider>
         </Provider>
       </body>

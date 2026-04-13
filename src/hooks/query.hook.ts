@@ -11,7 +11,7 @@ import AxiosInstance from "@/lib/axiosInstance";
 
 /** Options for mutation hooks */
 interface UseMutateOptions<TData> {
-  queryKey?: any[];
+  queryKey?: any[] | readonly any[];
   onSuccess?: (data: TData) => void;
   onError?: (error: any) => void;
   headers?: Record<string, string>;
@@ -19,7 +19,7 @@ interface UseMutateOptions<TData> {
 
 /** Options for fetch hooks */
 interface UseFetchOptions<TData> {
-  queryKey?: any[];
+  queryKey?: any[] | readonly any[];
   enabled?: boolean; // control automatic fetching
   headers?: Record<string, string>;
   staleTime?: number; // cache duration

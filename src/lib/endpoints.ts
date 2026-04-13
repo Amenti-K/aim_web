@@ -32,6 +32,8 @@ const endpoints = {
 
   MAIL: "/mail",
   MAILCONTACT: "/mail/contact",
+  AUDITLOG: "/audit",
 };
+
 
 export default endpoints;

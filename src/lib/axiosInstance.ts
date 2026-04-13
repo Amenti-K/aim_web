@@ -10,7 +10,7 @@ export const AxiosInstance = axios.create({
 AxiosInstance.interceptors.request.use(
   async (config) => {
     const state = store.getState();
-    const { accessToken } = state.adminAuth;
+    const { accessToken, company } = state.userAuth;
 
     if (!config.headers["Content-Type"]) {
       config.headers["Content-Type"] = "application/json";
@@ -20,11 +20,14 @@ AxiosInstance.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
+    if (company?.id && !config.url?.includes("/auth/")) {
+      config.headers["x-company-id"] = company.id;
+    }
     // console.log(
     //   "➡️ [REQUEST]",
     //   config.method?.toUpperCase(),
     //   config.url,
-    //   config.headers
+    //   config.headers,
     // );
     return config;
   },
@@ -54,18 +57,32 @@ AxiosInstance.interceptors.response.use(
     //   error.response?.data,
     // );
 
+    // if (error.response?.status === 503) {
+    //   console.log("Maintenance mode enabled");
+    //   store.dispatch(setMaintenanceMode(true));
+    //   store.dispatch(logout());
+    //   return Promise.reject(error);
+    // }
+
     const originalRequest = error.config;
     const state = store.getState();
+
+    // if (error.response?.status === 403) {
+    //   console.log("Refresh failed, forcing logout");
+    //   store.dispatch(logout());
+    //   return Promise.reject(error);
+    // }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const { refreshToken } = state.adminAuth;
+      const { refreshToken, company } = state.userAuth;
       if (refreshToken) {
         try {
           const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+            `${process.env.EXPO_PUBLIC_API_URL}/auth/refresh`,
             { refreshToken },
+            { headers: { "x-company-id": company?.id } },
           );
 
           const newAccessToken = res.data.accessToken;

@@ -3,7 +3,8 @@ import {
   ICancelSubscription,
   INewSubscription,
 } from "@/components/interface/subscription/subscription.interface";
-import { useMutate } from "@/hooks/query.hook";
+import { useMutate, useFetch } from "@/hooks/query.hook";
+
 import { useToast } from "@/hooks/use-toast";
 import endpoints from "@/lib/endpoints";
 import { useQueryClient } from "@tanstack/react-query";
@@ -100,3 +101,11 @@ export const useCancelSubscription = () => {
     }
   );
 };
+
+export const useFetchSubscription = (enabled: boolean = true) => {
+  return useFetch<any>(endpoints.SUBSCRIPTION + "/mine", {
+    queryKey: ["subscription", "mine"],
+    enabled,
+  });
+};
+

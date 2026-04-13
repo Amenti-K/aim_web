@@ -23,13 +23,13 @@ export const CompanyTable: React.FC<CompanyTableProps> = ({
     <div className="rounded-md border">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Company Name</TableHead>
+          <TableRow className="bg-primary">
+            <TableHead className="rounded-tl-md">Company Name</TableHead>
             <TableHead>Owner</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Plan</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
+            <TableHead className="rounded-tr-md">Created</TableHead>
             {/* <TableHead className="text-right">Actions</TableHead> */}
           </TableRow>
         </TableHeader>

@@ -1,5 +1,6 @@
 import {
   QueryKey,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -32,7 +33,7 @@ interface UseFetchOptions<TData> {
 export const useMutate = <TData = any>(
   urlOrFn: string | ((payload: TData) => string),
   method: AxiosRequestConfig["method"],
-  options?: UseMutateOptions<TData>
+  options?: UseMutateOptions<TData>,
 ) => {
   const queryClient = useQueryClient();
 
@@ -66,7 +67,7 @@ export const useMutate = <TData = any>(
  */
 export const useFetch = <TData = any>(
   urlOrFn: string | (() => string),
-  options?: UseFetchOptions<TData>
+  options?: UseFetchOptions<TData>,
 ) => {
   const queryClient = useQueryClient();
   const queryKey = options?.queryKey || [urlOrFn];
@@ -85,6 +86,50 @@ export const useFetch = <TData = any>(
       });
       return res.data;
     },
+    enabled: options?.enabled ?? true,
+    staleTime: options?.staleTime ?? 1000 * 60, // 1 minute by default
+  });
+
+  return { ...query, queryClient };
+};
+
+/**
+ * Universal infinite fetch hook for GET requests with pagination.
+ * @example const { data, fetchNextPage, hasNextPage } = useInfiniteFetch('/purchases', { queryKey: ['purchases'] });
+ */
+export const useInfiniteFetch = <TData = any>(
+  urlOrFn: string | (() => string),
+  options?: UseFetchOptions<TData>,
+) => {
+  const queryClient = useQueryClient();
+  const queryKey = options?.queryKey || [urlOrFn];
+
+  const query = useInfiniteQuery({
+    queryKey,
+    queryFn: async ({ pageParam = 1 }) => {
+      const url = typeof urlOrFn === "function" ? urlOrFn() : urlOrFn;
+      const res: AxiosResponse = await AxiosInstance({
+        url,
+        method: "get",
+        params: {
+          ...options?.params,
+          page: pageParam,
+          limit: options?.params?.limit || 10,
+        },
+        headers: {
+          ...(options?.headers || {}),
+        },
+      });
+      return res.data;
+    },
+    getNextPageParam: (lastPage: any) => {
+      const meta = lastPage?.meta;
+      if (meta?.hasNextPage) {
+        return meta.page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
     enabled: options?.enabled ?? true,
     staleTime: options?.staleTime ?? 1000 * 60, // 1 minute by default
   });

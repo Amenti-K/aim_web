@@ -8,14 +8,6 @@ import { CompanyTable } from "@/components/company/CompanyTable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
   useAttachCashAccount,
   useFetchCompanies,
 } from "@/api/company/api.company";
@@ -40,14 +32,18 @@ const Companies = () => {
     ownerPhone: "",
   });
 
-  const { data, isLoading, error, refetch } = useFetchCompanies(
-    filters.page,
-    filters.limit,
-    filters.name,
-    filters.ownerPhone,
-  );
-  const companies = data?.data || ([] as ICompanyList[]);
-  const meta = data?.meta;
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useFetchCompanies(filters.limit, filters.name, filters.ownerPhone);
+
+  const companies =
+    data?.pages.flatMap((page) => page.data) || ([] as ICompanyList[]);
 
   if (isLoading) {
     return <LoadingView />;
@@ -62,16 +58,10 @@ const Companies = () => {
       ...prev,
       name: name || undefined,
       ownerPhone: phone || undefined,
-      page: 1,
-      limit: 10,
     }));
-    refetch();
+    // Refetch is handled automatically by queryKey changes in the hook
   };
 
-  const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-    refetch();
-  };
 
   const handelCompanyClick = (id: string) => {
     router.push(`/admin/company/${id}`);
@@ -139,45 +129,33 @@ const Companies = () => {
         </div>
       )}
 
-      {/* {meta && meta.totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => handlePageChange(Math.max(1, filters.page - 1))}
-                className={
-                  filters.page === 1
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
-              />
-            </PaginationItem>
-            {Array.from({ length: meta.totalPages }).map((_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  onClick={() => handlePageChange(i + 1)}
-                  isActive={filters.page === i + 1}
-                  className="cursor-pointer"
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                onClick={() =>
-                  handlePageChange(Math.min(meta.totalPages, filters.page + 1))
-                }
-                className={
-                  filters.page === meta.totalPages
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )} */}
+      {hasNextPage && (
+        <div className="flex justify-center pt-4">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="min-w-[200px]"
+          >
+            {isFetchingNextPage ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                Loading...
+              </div>
+            ) : (
+              "Load More Companies"
+            )}
+          </Button>
+        </div>
+      )}
+
+      {!hasNextPage && companies.length > 0 && (
+        <p className="text-center text-sm text-muted-foreground pt-4">
+          No more companies to show
+        </p>
+      )}
+
     </div>
   );
 };

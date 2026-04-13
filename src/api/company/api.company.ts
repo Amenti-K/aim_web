@@ -1,4 +1,4 @@
-import { useFetch, useMutate } from "@/hooks/query.hook";
+import { useFetch, useInfiniteFetch, useMutate } from "@/hooks/query.hook";
 import endpoints from "@/lib/endpoints";
 import {
   IPaginatedResponse,
@@ -10,16 +10,17 @@ import {
 } from "@/components/interface/company/company.interface";
 
 export const useFetchCompanies = (
-  page: number = 1,
   limit: number = 10,
   name?: string,
   ownerPhone?: string,
 ) => {
-  const url = `${endpoints.COMPANY}?page=${page}&limit=${limit}${
-    name ? `&name=${name}` : ""
-  }${ownerPhone ? `&ownerPhone=${ownerPhone}` : ""}`;
-  return useFetch<IPaginatedResponse<ICompanyList>>(url, {
-    queryKey: ["companies"],
+  return useInfiniteFetch<IPaginatedResponse<ICompanyList>>(endpoints.COMPANY, {
+    queryKey: ["companies", name, ownerPhone],
+    params: {
+      limit,
+      name,
+      ownerPhone,
+    },
   });
 };
 

@@ -7,6 +7,9 @@ export interface IPaginationMeta {
   page: number;
   limit: number;
   total: number;
+  lastPage: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
 
 export interface IPaginatedResponse<T> extends IResponse<T[]> {

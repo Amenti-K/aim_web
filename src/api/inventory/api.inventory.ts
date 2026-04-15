@@ -125,6 +125,16 @@ export const useFetchInventory = (id: string, enabled?: boolean) => {
   });
 };
 
+export const useFetchWarehouseInventorySelector = (
+  warehouseId: string,
+  enabled?: boolean,
+) => {
+  return useFetch<any>(`${endpoints.INVENTORY}/select/${warehouseId}`, {
+    queryKey: queryKeys.warehouses.inventories(warehouseId),
+    enabled: enabled ?? !!warehouseId,
+  });
+};
+
 export const useFetchInventoryAnalytics = (
   id: string,
   enabled?: boolean,

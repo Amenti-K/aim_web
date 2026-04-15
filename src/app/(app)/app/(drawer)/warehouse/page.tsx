@@ -1,52 +1,32 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { useGetWarehousesInfinite, useCreateWarehouse } from "@/api/warehouse/api.warehouse";
+import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useGetWarehousesInfinite } from "@/api/warehouse/api.warehouse";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, MoreHorizontal } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Plus, Search, MoreHorizontal, Eye, Pencil } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
 export default function WarehousePage() {
-  const { canView, canCreate } = usePermissions();
+  const router = useRouter();
+  const { canView, canCreate, canUpdate } = usePermissions();
   const hasViewAccess = canView("WAREHOUSES");
   const hasCreateAccess = canCreate("WAREHOUSES");
+  const hasUpdateAccess = canUpdate("WAREHOUSES");
+  const [search, setSearch] = useState("");
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-  } = useGetWarehousesInfinite({}, hasViewAccess);
+  const { data, isLoading, isError, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useGetWarehousesInfinite({ search }, hasViewAccess);
 
-  const warehouses = useMemo(() => {
-    return data?.pages?.flatMap((page) => (page as any).data) ?? [];
-  }, [data]);
+  const warehouses = useMemo(() => data?.pages?.flatMap((page) => (page as any).data) ?? [], [data]);
 
-  if (!hasViewAccess) {
-    return <AccessDeniedView moduleName="Warehouses" />;
-  }
-
+  if (!hasViewAccess) return <AccessDeniedView moduleName="Warehouses" />;
   if (isLoading) return <LoadingView />;
   if (isError) return <ErrorView refetch={refetch} />;
 
@@ -55,25 +35,18 @@ export default function WarehousePage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Warehouses</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your physical and internal storage locations.
-          </p>
+          <p className="text-sm text-muted-foreground">Manage your storage locations.</p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" onClick={() => router.push("/app/warehouse/new")}>
             <Plus className="mr-2 h-4 w-4" /> Add Warehouse
           </Button>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search warehouses..."
-            className="pl-8"
-          />
-        </div>
+      <div className="relative max-w-sm">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search warehouses..." className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="rounded-md border bg-card">
@@ -89,37 +62,20 @@ export default function WarehousePage() {
           </TableHeader>
           <TableBody>
             {warehouses.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
-                  No warehouses found.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={5} className="h-24 text-center">No warehouses found.</TableCell></TableRow>
             ) : (
               warehouses.map((warehouse: any) => (
-                <TableRow key={warehouse.id}>
+                <TableRow key={warehouse.id} className="cursor-pointer" onClick={() => router.push(`/app/warehouse/${warehouse.id}`)}>
                   <TableCell className="font-medium">{warehouse.name}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {warehouse.location || "N/A"}
-                  </TableCell>
+                  <TableCell>{warehouse.location || "N/A"}</TableCell>
                   <TableCell>{warehouse.contactPhone || "N/A"}</TableCell>
-                  <TableCell>
-                    <Badge variant={warehouse.isInternal ? "secondary" : "outline"}>
-                      {warehouse.isInternal ? "Internal" : "External"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
+                  <TableCell><Badge variant={warehouse.isInternal ? "secondary" : "outline"}>{warehouse.isInternal ? "Internal" : "External"}</Badge></TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Delete
-                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push(`/app/warehouse/${warehouse.id}`)}><Eye className="mr-2 h-4 w-4" /> View details</DropdownMenuItem>
+                        {hasUpdateAccess && <DropdownMenuItem onClick={() => router.push(`/app/warehouse/${warehouse.id}/edit`)}><Pencil className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -128,14 +84,9 @@ export default function WarehousePage() {
             )}
           </TableBody>
         </Table>
-        
         {hasNextPage && (
           <div className="flex justify-center p-4">
-            <Button
-              variant="outline"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-            >
+            <Button variant="outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
               {isFetchingNextPage ? "Loading more..." : "Load More"}
             </Button>
           </div>

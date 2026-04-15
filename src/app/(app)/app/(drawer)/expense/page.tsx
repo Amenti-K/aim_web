@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useGetExpensesInfinite } from "@/api/expense/api.expense";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, MoreHorizontal, ReceiptText } from "lucide-react";
+import { Plus, Search, MoreHorizontal, ReceiptText, Eye, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -26,9 +27,12 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/formatter";
 
 export default function ExpensePage() {
-  const { canView, canCreate } = usePermissions();
+  const router = useRouter();
+  const { canView, canCreate, canUpdate } = usePermissions();
   const hasViewAccess = canView("EXPENSE");
   const hasCreateAccess = canCreate("EXPENSE");
+  const hasUpdateAccess = canUpdate("EXPENSE");
+  const [search, setSearch] = React.useState("");
 
   const {
     data,
@@ -38,7 +42,7 @@ export default function ExpensePage() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useGetExpensesInfinite({}, hasViewAccess);
+  } = useGetExpensesInfinite({ search }, hasViewAccess);
 
   const expenses = React.useMemo(() => {
     return data?.pages?.flatMap((page) => (page as any).data) ?? [];
@@ -61,7 +65,7 @@ export default function ExpensePage() {
           </p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" onClick={() => router.push("/app/expense/new")}>
             <Plus className="mr-2 h-4 w-4" /> Add Expense
           </Button>
         )}
@@ -70,7 +74,7 @@ export default function ExpensePage() {
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search expenses..." className="pl-8" />
+          <Input placeholder="Search expenses..." className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
@@ -94,7 +98,7 @@ export default function ExpensePage() {
               </TableRow>
             ) : (
               expenses.map((exp: any) => (
-                <TableRow key={exp.id}>
+                <TableRow key={exp.id} className="cursor-pointer" onClick={() => router.push(`/app/expense/${exp.id}`)}>
                   <TableCell className="font-medium whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <ReceiptText className="h-4 w-4 text-muted-foreground" />
@@ -110,7 +114,7 @@ export default function ExpensePage() {
                   <TableCell className="font-bold text-destructive">
                     -${Number(exp.amount).toLocaleString()}
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -118,11 +122,14 @@ export default function ExpensePage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Delete
+                        <DropdownMenuItem onClick={() => router.push(`/app/expense/${exp.id}`)}>
+                          <Eye className="mr-2 h-4 w-4" /> View details
                         </DropdownMenuItem>
+                        {hasUpdateAccess && (
+                          <DropdownMenuItem onClick={() => router.push(`/app/expense/${exp.id}/edit`)}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

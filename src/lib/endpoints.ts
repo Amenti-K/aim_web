@@ -32,7 +32,7 @@ const endpoints = {
 
   MAIL: "/mail",
   MAILCONTACT: "/mail/contact",
-  AUDITLOG: "/audit",
+  AUDITLOG: "/audit-log",
 };
 
 

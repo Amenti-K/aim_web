@@ -89,6 +89,13 @@ export const useUpdateWarehouse = (id: string) => {
   });
 };
 
+export const useFetchWarehouseById = (id: string, enabled?: boolean) => {
+  return useFetch<any>(`${endpoints.WAREHOUSE}/${id}`, {
+    queryKey: queryKeys.warehouses.detail(id),
+    enabled: enabled ?? !!id,
+  });
+};
+
 export const useFetchWarehouseSelector = () => {
   return useFetch<IWarehouseSelectResponse>(endpoints.WAREHOUSE + "/select", {
     queryKey: queryKeys.warehouses.selector(),

@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useGetAdjustmentsInfinite } from "@/api/adjustment/api.adjustment";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, MoreHorizontal, MoveHorizontal } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Eye, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -26,9 +27,12 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/formatter";
 
 export default function AdjustmentPage() {
-  const { canView, canCreate } = usePermissions();
+  const router = useRouter();
+  const { canView, canCreate, canUpdate } = usePermissions();
   const hasViewAccess = canView("INVENTORYADJUSTMENT");
   const hasCreateAccess = canCreate("INVENTORYADJUSTMENT");
+  const hasUpdateAccess = canUpdate("INVENTORYADJUSTMENT");
+  const [search, setSearch] = React.useState("");
 
   const {
     data,
@@ -38,7 +42,7 @@ export default function AdjustmentPage() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useGetAdjustmentsInfinite({}, hasViewAccess);
+  } = useGetAdjustmentsInfinite({ search }, hasViewAccess);
 
   const adjustments = React.useMemo(() => {
     return data?.pages?.flatMap((page) => (page as any).data) ?? [];
@@ -63,7 +67,7 @@ export default function AdjustmentPage() {
           </p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" onClick={() => router.push("/app/adjustment/new")}>
             <Plus className="mr-2 h-4 w-4" /> New Adjustment
           </Button>
         )}
@@ -72,7 +76,7 @@ export default function AdjustmentPage() {
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search adjustments..." className="pl-8" />
+          <Input placeholder="Search adjustments..." className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
@@ -97,28 +101,25 @@ export default function AdjustmentPage() {
               </TableRow>
             ) : (
               adjustments.map((adj: any) => (
-                <TableRow key={adj.id}>
+                <TableRow key={adj.id} className="cursor-pointer" onClick={() => router.push(`/app/adjustment/${adj.id}`)}>
                   <TableCell className="font-medium whitespace-nowrap">
                     {formatDate(adj.createdAt)}
                   </TableCell>
-                  <TableCell>{adj.inventory?.name || "Unknown Item"}</TableCell>
+                  <TableCell>{adj.warehouse?.name || adj.inventory?.name || "Unknown"}</TableCell>
                   <TableCell>
                     <Badge
                       variant={
-                        adj.type === "INCREASE" ? "secondary" : "destructive"
+                        adj.type === "STOCK_IN" ? "secondary" : "destructive"
                       }
                     >
                       {adj.type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-bold">
-                    {adj.type === "INCREASE" ? "+" : "-"}
-                    {adj.quantity}
-                  </TableCell>
+                  <TableCell className="font-bold">{adj.itemsCount ?? adj.quantity ?? 0}</TableCell>
                   <TableCell className="max-w-[200px] truncate text-muted-foreground">
                     {adj.reason || "Manual Correction"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -126,7 +127,14 @@ export default function AdjustmentPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push(`/app/adjustment/${adj.id}`)}>
+                          <Eye className="mr-2 h-4 w-4" /> View details
+                        </DropdownMenuItem>
+                        {hasUpdateAccess && (
+                          <DropdownMenuItem onClick={() => router.push(`/app/adjustment/${adj.id}/edit`)}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

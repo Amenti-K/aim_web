@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useGetPartnersInfinite } from "@/api/partner/api.partner";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, MoreHorizontal, User } from "lucide-react";
+import { Plus, Search, MoreHorizontal, User, Eye, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -25,9 +26,12 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function PartnerPage() {
-  const { canView, canCreate } = usePermissions();
+  const router = useRouter();
+  const { canView, canCreate, canUpdate } = usePermissions();
   const hasViewAccess = canView("PARTNERS");
   const hasCreateAccess = canCreate("PARTNERS");
+  const hasUpdateAccess = canUpdate("PARTNERS");
+  const [search, setSearch] = useState("");
 
   const {
     data,
@@ -37,7 +41,7 @@ export default function PartnerPage() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useGetPartnersInfinite({}, hasViewAccess);
+  } = useGetPartnersInfinite({ search }, hasViewAccess);
 
   const partners = useMemo(() => {
     return data?.pages?.flatMap((page) => (page as any).data) ?? [];
@@ -60,7 +64,7 @@ export default function PartnerPage() {
           </p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" onClick={() => router.push("/app/partner/new")}>
             <Plus className="mr-2 h-4 w-4" /> Add Partner
           </Button>
         )}
@@ -69,10 +73,7 @@ export default function PartnerPage() {
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search partners..."
-            className="pl-8"
-          />
+          <Input placeholder="Search partners..." className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
@@ -95,7 +96,7 @@ export default function PartnerPage() {
               </TableRow>
             ) : (
               partners.map((partner: any) => (
-                <TableRow key={partner.id}>
+                <TableRow key={partner.id} className="cursor-pointer" onClick={() => router.push(`/app/partner/${partner.id}`)}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
@@ -110,7 +111,7 @@ export default function PartnerPage() {
                   <TableCell className="max-w-[200px] truncate text-muted-foreground">
                     {partner.address || "N/A"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -118,11 +119,14 @@ export default function PartnerPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View History</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Delete
+                        <DropdownMenuItem onClick={() => router.push(`/app/partner/${partner.id}`)}>
+                          <Eye className="mr-2 h-4 w-4" /> View details
                         </DropdownMenuItem>
+                        {hasUpdateAccess && (
+                          <DropdownMenuItem onClick={() => router.push(`/app/partner/${partner.id}/edit`)}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

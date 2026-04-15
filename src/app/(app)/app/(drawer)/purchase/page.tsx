@@ -1,12 +1,15 @@
 "use client";
 
 import React from "react";
-import { useInfinitePurchases } from "@/api/purchase/api.purchase";
+import {
+  useDeletePurchase,
+  useInfinitePurchases,
+} from "@/api/purchase/api.purchase";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, MoreHorizontal, ShoppingCart } from "lucide-react";
+import { Plus, MoreHorizontal, ShoppingCart, Eye, Pencil, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -21,13 +24,29 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/formatter";
+import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function PurchasePage() {
-  const { canView, canCreate } = usePermissions();
+  const router = useRouter();
+  const { canView, canCreate, canUpdate, canDelete } = usePermissions();
   const hasViewAccess = canView("PURCHASE");
   const hasCreateAccess = canCreate("PURCHASE");
+  const hasUpdateAccess = canUpdate("PURCHASE");
+  const hasDeleteAccess = canDelete("PURCHASE");
+  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
+  const [selectedPurchaseId, setSelectedPurchaseId] = React.useState<string | null>(null);
+  const deletePurchase = useDeletePurchase();
 
   const {
     data,
@@ -42,6 +61,19 @@ export default function PurchasePage() {
   const purchases = React.useMemo(() => {
     return data?.pages?.flatMap((page) => (page as any).data) ?? [];
   }, [data]);
+
+  const handleDelete = () => {
+    if (!selectedPurchaseId) return;
+    deletePurchase.mutate(
+      { id: selectedPurchaseId },
+      {
+        onSuccess: () => {
+          setIsDeleteOpen(false);
+          setSelectedPurchaseId(null);
+        },
+      },
+    );
+  };
 
   if (!hasViewAccess) {
     return <AccessDeniedView moduleName="Purchase" />;
@@ -60,17 +92,10 @@ export default function PurchasePage() {
           </p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" onClick={() => router.push("/app/purchase/new")}>
             <Plus className="mr-2 h-4 w-4" /> New Purchase
           </Button>
         )}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search purchases..." className="pl-8" />
-        </div>
       </div>
 
       <div className="rounded-md border bg-card">
@@ -93,7 +118,11 @@ export default function PurchasePage() {
               </TableRow>
             ) : (
               purchases.map((purchase: any) => (
-                <TableRow key={purchase.id}>
+                <TableRow
+                  key={purchase.id}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/app/purchase/${purchase.id}`)}
+                >
                   <TableCell className="font-medium whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -111,7 +140,7 @@ export default function PurchasePage() {
                       Received
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -119,11 +148,27 @@ export default function PurchasePage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Download Receipt</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Return Items
+                        <DropdownMenuItem onClick={() => router.push(`/app/purchase/${purchase.id}`)}>
+                          <Eye className="mr-2 h-4 w-4" /> View Details
                         </DropdownMenuItem>
+                        {hasUpdateAccess && (
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/app/purchase/${purchase.id}/edit`)}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                        )}
+                        {hasDeleteAccess && (
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => {
+                              setSelectedPurchaseId(purchase.id);
+                              setIsDeleteOpen(true);
+                            }}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -145,6 +190,26 @@ export default function PurchasePage() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete purchase?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The selected purchase record will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

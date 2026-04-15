@@ -1,12 +1,24 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { useGetInventoriesInfinite } from "@/api/inventory/api.inventory";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  StockStatus,
+  useDeleteInventory,
+  useGetInventoriesInfinite,
+} from "@/api/inventory/api.inventory";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, MoreHorizontal, Package } from "lucide-react";
+import {
+  Plus,
+  Search,
+  MoreHorizontal,
+  Package,
+  Eye,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -23,11 +35,46 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function InventoryPage() {
-  const { canView, canCreate } = usePermissions();
+  const router = useRouter();
+  const { canView, canCreate, canUpdate, canDelete } = usePermissions();
   const hasViewAccess = canView("INVENTORY");
   const hasCreateAccess = canCreate("INVENTORY");
+  const hasUpdateAccess = canUpdate("INVENTORY");
+  const hasDeleteAccess = canDelete("INVENTORY");
+  const [searchText, setSearchText] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [stockStatus, setStockStatus] = useState<StockStatus>(StockStatus.ALL);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedInventoryId, setSelectedInventoryId] = useState<string | null>(
+    null,
+  );
+  const deleteInventory = useDeleteInventory();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setSearchQuery(searchText.trim()), 300);
+    return () => clearTimeout(timeout);
+  }, [searchText]);
+
+  const filters = useMemo(
+    () => ({
+      ...(searchQuery ? { search: searchQuery } : {}),
+      stockStatus,
+    }),
+    [searchQuery, stockStatus],
+  );
 
   const {
     data,
@@ -37,11 +84,24 @@ export default function InventoryPage() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useGetInventoriesInfinite({}, hasViewAccess);
+  } = useGetInventoriesInfinite(filters, hasViewAccess);
 
   const items = useMemo(() => {
     return data?.pages?.flatMap((page) => (page as any).data) ?? [];
   }, [data]);
+
+  const handleDelete = () => {
+    if (!selectedInventoryId) return;
+    deleteInventory.mutate(
+      { id: selectedInventoryId },
+      {
+        onSuccess: () => {
+          setIsDeleteOpen(false);
+          setSelectedInventoryId(null);
+        },
+      },
+    );
+  };
 
   if (!hasViewAccess) {
     return <AccessDeniedView moduleName="Inventory" />;
@@ -60,16 +120,40 @@ export default function InventoryPage() {
           </p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto">
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => router.push("/app/inventory/new")}
+          >
             <Plus className="mr-2 h-4 w-4" /> Add Item
           </Button>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search inventory..." className="pl-8" />
+          <Input
+            placeholder="Search inventory..."
+            className="pl-8"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { label: "All", value: StockStatus.ALL },
+            { label: "Low", value: StockStatus.LOW },
+            { label: "Out", value: StockStatus.OUT },
+          ].map((tab) => (
+            <Button
+              key={tab.value}
+              type="button"
+              variant={stockStatus === tab.value ? "default" : "outline"}
+              onClick={() => setStockStatus(tab.value)}
+            >
+              {tab.label}
+            </Button>
+          ))}
         </div>
       </div>
 
@@ -94,7 +178,11 @@ export default function InventoryPage() {
               </TableRow>
             ) : (
               items.map((item: any) => (
-                <TableRow key={item.id}>
+                <TableRow
+                  key={item.id}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/app/inventory/${item.id}`)}
+                >
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       <div className="rounded bg-muted p-1">
@@ -103,7 +191,7 @@ export default function InventoryPage() {
                       <span>{item.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{item.sku || "N/A"}</TableCell>
+                  <TableCell>{item.sku || "-"}</TableCell>
                   <TableCell>
                     <span
                       className={
@@ -116,7 +204,7 @@ export default function InventoryPage() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    ${Number(item.sellPrice).toLocaleString()}
+                    ${Number(item.sellingPrice).toLocaleString()}
                   </TableCell>
                   <TableCell>
                     {item.quantity <= 0 ? (
@@ -137,7 +225,7 @@ export default function InventoryPage() {
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -145,11 +233,31 @@ export default function InventoryPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Stats</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Adjust Stock
+                        <DropdownMenuItem
+                          onClick={() => router.push(`/app/inventory/${item.id}`)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" /> View Details
                         </DropdownMenuItem>
+                        {hasUpdateAccess && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              router.push(`/app/inventory/${item.id}/edit`)
+                            }
+                          >
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                        )}
+                        {hasDeleteAccess && (
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => {
+                              setSelectedInventoryId(item.id);
+                              setIsDeleteOpen(true);
+                            }}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -171,6 +279,27 @@ export default function InventoryPage() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete inventory?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The selected inventory item will be
+              permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

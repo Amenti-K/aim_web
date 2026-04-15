@@ -1,11 +1,45 @@
-import { IPartner } from "../partner/partner.interfacce";
+import { IAccount } from "@/api/account/api.account";
 
-export interface ILoanPartner extends IPartner {
+export enum LoanTxType {
+  LOAN_GIVEN = "loan_given",
+  LOAN_TAKEN = "loan_taken",
+  LOAN_PAYMENT = "loan_payment",
+  LOAN_RECEIPT = "loan_receipt",
+  SALE_FINANCING = "sale_financing",
+  PURCHASE_FINANCING = "purchase_financing",
+  ADJUSTMENT = "adjustment",
+}
+
+export interface ILastAudit {
+  createdAt: Date;
+  createdBy: {
+    id: string;
+    fullName: string;
+  };
+}
+
+export interface ILoanPartner {
+  id: string;
+  name: string;
+  phone?: string;
+  address?: string;
   balance: number;
 }
 
-export interface ILoanPartnerResponse {
-  data: ILoanPartner[];
+export interface ILoanPayment {
+  id: string;
+  amount: number;
+  description: string;
+  account?: IAccount;
+  accountId: string;
+}
+
+export interface ILoanCashPayment {
+  id: string;
+  amount: number;
+  description: string;
+  account?: IAccount;
+  accountId: string;
 }
 
 export interface ILoanTranx {
@@ -13,39 +47,37 @@ export interface ILoanTranx {
   partnerId: string;
   txType: LoanTxType;
   amount: number;
-  notes?: string;
+  note?: string;
   dueDate?: Date | null;
-  createdAt?: Date;
+  createdAt?: string;
+
+  loanPayments?: ILoanPayment[];
+  loanCashPayment?: ILoanCashPayment;
+
+  purchaseId?: string;
+  saleId?: string;
+  lastAuditLog?: ILastAudit;
 }
 
-export type LoanTxType =
-  | "loan_given"
-  | "loan_taken"
-  | "payment"
-  | "adjustment"
-  | "invoice_link";
-
-export interface ILoanTranxResponse {
-  data: { transactions: ILoanTranx[]; balance: number };
+export interface IPaymentItem {
+  accountId: string;
+  amount: number;
 }
 
-export interface ICreatePartnerAndInitialLoanTranx {
-  createPartnerDto: Omit<IPartner, "id">;
-  createLoanTransactionDto: Omit<ILoanTranx, "id" | "partnerId" | "createdAt">;
+export interface ILoanCashPaymentInput {
+  amount: number;
+  description?: string;
 }
 
 export interface INewLoanTranx {
   partnerId: string;
   txType: LoanTxType;
-  amount: number;
-  notes?: string;
+  paymentItems?: IPaymentItem[];
+  loanCashPayment?: ILoanCashPaymentInput;
+  note?: string;
   dueDate?: Date | null;
 }
 
-export interface ILoanTranxFormProps {
-  modalOpen?: boolean;
-  closeModal?: () => void;
-  selectedTranxId?: string | undefined;
-  onEdit?: (value: any) => void;
-  item?: ILoanTranx | null;
+export interface IUpdateLoanTranx extends Partial<INewLoanTranx> {
+  id: string;
 }

@@ -52,6 +52,7 @@ export interface IPurchaseView extends IPurchase {
   partner?: any;
   purchaseItems: any[];
   purchasePayments: any[];
+  purchaseCashPayment?: any;
   loan?: any;
   lastAuditLog: any;
 }

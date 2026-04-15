@@ -54,7 +54,10 @@ const NumericField = ({
               id={name}
               placeholder={placeholder}
               onBlur={onBlur}
-              onChange={onChange}
+              onChange={(e) => {
+                const val = e.target.value;
+                onChange(val === "" ? undefined : Number(val));
+              }}
               value={typeof value === "number" ? String(value) : (value ?? "")}
               disabled={disabled}
               type={inputType}

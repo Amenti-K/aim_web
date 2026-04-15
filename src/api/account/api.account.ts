@@ -57,12 +57,16 @@ export const useCreateAccount = () => {
   });
 };
 
-export const useUpdateAccount = (id: string) => {
-  return useMutate<any>(`${endpoints.ACCOUNT}/${id}`, "patch", {
-    onError: onErrorNotification,
-    onSuccess: onSuccessNotification,
-    queryKey: queryKeys.accounts.root,
-  });
+export const useUpdateAccount = () => {
+  return useMutate<any>(
+    (data: any) => `${endpoints.ACCOUNT}/${data.id}`,
+    "patch",
+    {
+      onError: onErrorNotification,
+      onSuccess: onSuccessNotification,
+      queryKey: queryKeys.accounts.root,
+    }
+  );
 };
 
 export const useDeleteAccount = () => {

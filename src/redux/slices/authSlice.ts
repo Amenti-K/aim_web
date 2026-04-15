@@ -60,6 +60,7 @@ const authSlice = createSlice({
           secure: true,
           sameSite: "strict",
           expires: 1, // 1 day
+          path: "/",
         }
       );
     },
@@ -74,7 +75,7 @@ const authSlice = createSlice({
       Cookies.set(
         COOKIE_KEY,
         JSON.stringify({ ...parsed, accessToken: action.payload }),
-        { secure: true, sameSite: "strict", expires: 1 }
+        { secure: true, sameSite: "strict", expires: 1, path: "/" }
       );
     },
 

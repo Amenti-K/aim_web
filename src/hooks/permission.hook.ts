@@ -51,14 +51,30 @@ export const usePermissions = (roleId?: string) => {
 
   const can = useCallback(
     (module: Module, permission: Permission) => {
-      if (!effectiveRoleId) return false;
-      const perms = byRole[effectiveRoleId];
-      if (!perms) return false;
-      const modulePerms = perms[module] || [];
-      if (modulePerms.includes("ALL")) return true;
-      return modulePerms.includes(permission);
+      // 1. Check if we have specific role-based permissions in the slice
+      if (effectiveRoleId) {
+        const perms = byRole[effectiveRoleId];
+        if (perms) {
+          const modulePerms = perms[module] || [];
+          if (modulePerms.includes("ALL")) return true;
+          return modulePerms.includes(permission);
+        }
+      }
+
+      // 2. Fallback: If slice is empty but we have permissions in the user object (hydrated from cookie)
+      // This prevents the "Restricted" flash on reload
+      if (effectiveRoleId === user?.role.id && user?.role.permissions) {
+        const matchingPerm = user.role.permissions.find(
+          (p: any) =>
+            p.module === module &&
+            (p.permission === permission || p.permission === "ALL"),
+        );
+        return !!matchingPerm;
+      }
+
+      return false;
     },
-    [byRole, effectiveRoleId],
+    [byRole, effectiveRoleId, user],
   );
 
   const canCreate = useCallback(

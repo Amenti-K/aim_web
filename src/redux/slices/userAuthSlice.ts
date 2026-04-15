@@ -40,6 +40,7 @@ const COOKIE_OPTIONS: Cookies.CookieAttributes = {
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict",
   expires: 7, // 7 days — good for PWA offline token retention
+  path: "/",
 };
 
 function saveToCookie(state: Omit<UserAuthState, "loading" | "error">) {

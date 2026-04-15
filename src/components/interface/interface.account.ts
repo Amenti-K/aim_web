@@ -1,6 +1,7 @@
 export interface IAccount {
   id: string;
   name: string;
+  type: AccountType;
   bank: EthiopianFinancialInstitution;
   branch: string;
   number: string | undefined;
@@ -13,30 +14,28 @@ export interface IAccount {
 }
 
 export enum transferType {
-  transfer_in = "transfer_in",
-  sale = "sale",
-  transfer_out = "transfer_out",
-  expense = "expense",
   purchase = "purchase",
+  sale = "sale",
+  expense = "expense",
+  transfer = "transfer",
+  loan = "loan",
 }
 
 export interface ITransaction {
   id: string;
+  source: string;
+  direction: "in" | "out";
   amount: number;
-  description: string;
+  description?: string;
+  relatedName?: string;
+  txSubType?: string;
   createdAt: Date;
-  type: transferType;
-}
-
-export interface ITransferTransaction extends ITransaction {
-  transferDate?: Date;
-  fromAccount?: { name: string };
-  toAccount?: { name: string };
 }
 
 export interface IAccountDetail {
   id: string;
   name: string;
+  type: AccountType;
   bank: EthiopianFinancialInstitution;
   branch: string;
   number: string | undefined;
@@ -50,8 +49,8 @@ export interface IAccountDetail {
 export interface IAccountCreate {
   name: string;
   bank: EthiopianFinancialInstitution;
-  branch: string;
-  number: string | undefined;
+  branch?: string;
+  number?: string;
   balance: number;
 }
 
@@ -59,6 +58,11 @@ export interface IAccountUpdate {
   name?: string;
   bank?: EthiopianFinancialInstitution;
   branch?: string;
+}
+
+export enum AccountType {
+  Bank = "Bank",
+  Cash = "Cash",
 }
 
 export enum EthiopianFinancialInstitution {

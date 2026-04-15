@@ -10,11 +10,6 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(logoutUser());
-  }, []);
-
   return (
     <div className="flex min-h-screen bg-background">
       {/* Left side Marketing Panel */}

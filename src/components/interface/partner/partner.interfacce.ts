@@ -1,7 +1,8 @@
+import { ILastAudit } from "../auditLog/interface.audit";
 import { IInventory } from "../inventory/inventory.interface";
 import { ILoanTranx } from "../loan/loan.interface";
 import { IPurchase } from "../purchase/purchase.interface";
-import { ISale } from "../sells/interface.sells";
+import { ISale } from "../sales/interface.sale";
 
 export interface IPartner {
   id: string;
@@ -28,6 +29,8 @@ export interface IPartnerFormProps {
   selectedPartnerId?: string | undefined;
   onEdit?: (value: any) => void;
   item?: IPartner | null;
+  onSuccess?: (partner: any) => void;
+  isQuickAdd?: boolean;
 }
 
 export interface IPartnerSelector {
@@ -43,6 +46,7 @@ export interface IPartnerDetail extends IPartner {
   loans: ILoanTranx[];
   sale: ISale[];
   purchases: IPurchase[];
+  lastAuditLog: ILastAudit;
 }
 
 export interface IPurchasePartner {

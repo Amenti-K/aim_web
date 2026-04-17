@@ -18,145 +18,233 @@ import {
   Clock3,
   DollarSign,
   Activity,
+  RefreshCcw,
 } from "lucide-react";
+import {
+  useGetAnalytics,
+  usePieChart,
+  useProfit,
+} from "@/api/analytics/api.analytics";
+import { LoadingView, ErrorView } from "@/components/common/StateView";
+import PerformanceChart from "@/components/analytics/PerformanceChart";
+// import TrendChart from "@/components/analytics/TrendChart";
+import { TimeFrame } from "@/components/interface/inventory/inventory.interface";
 
-const summary = {
-  totalInventoryValue: 125000,
-  lowestStock: { inventory: "Sugar", quantity: 3 },
-  bestSelling: { inventory: "Coffee", quantity: 120 },
-  mostUnsold: { inventory: "Salt", quantity: 5 },
-  totalRevenue: 120000,
-  totalProfit: 54000,
-};
-
-const chipOptions = ["30", "90", "180", "365"];
-
-const cards = [
-  {
-    title: "Best Selling",
-    value: summary.bestSelling.inventory,
-    subtitle: `${summary.bestSelling.quantity} sold`,
-  },
-  {
-    title: "Most Unsold",
-    value: summary.mostUnsold.inventory,
-    subtitle: `${summary.mostUnsold.quantity} items`,
-  },
-  { title: "Revenue", value: formatCurrency(summary.totalRevenue) },
-  { title: "Profit", value: formatCurrency(summary.totalProfit) },
+const timeFrameOptions = [
+  { label: "30 Days", value: TimeFrame.LAST_30_DAYS },
+  { label: "90 Days", value: TimeFrame.LAST_90_DAYS },
+  { label: "6 Months", value: TimeFrame.LAST_180_DAYS },
+  { label: "1 Year", value: TimeFrame.LAST_365_DAYS },
 ];
 
 export default function DashboardPage() {
-  const [timeFrame, setTimeFrame] = useState("30");
+  const [timeFrame, setTimeFrame] = useState<TimeFrame>(TimeFrame.LAST_30_DAYS);
+
+  const {
+    data: summaryData,
+    isLoading: isSummaryLoading,
+    isError: isSummaryError,
+    refetch: refetchSummary,
+  } = useGetAnalytics();
+
+  const {
+    data: pieData,
+    isLoading: isPieLoading,
+    isError: isPieError,
+    refetch: refetchPie,
+  } = usePieChart(true, { timeFrame });
+
+  // const {
+  //   data: profitData,
+  //   isLoading: isProfitLoading,
+  //   isError: isProfitError,
+  //   refetch: refetchProfit,
+  // } = useProfit();
+
+  const handleRefresh = () => {
+    refetchSummary();
+    refetchPie();
+    // refetchProfit();
+  };
+
+  if (isSummaryLoading || isPieLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <LoadingView message="Tailoring your analytics dashboard..." />
+      </div>
+    );
+  }
+
+  if (isSummaryError || isPieError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <ErrorView
+          message="We couldn't load your analytics. Please try again."
+          refetch={handleRefresh}
+        />
+      </div>
+    );
+  }
+
+  const summary = summaryData?.summary;
+  const pie = pieData;
+  // const profit = profitData;
+
+  const quickStats = [
+    {
+      title: "Best Selling",
+      value: pie?.bestSelling?.inventory || "N/A",
+      subtitle: pie?.bestSelling?.quantity
+        ? `${pie.bestSelling.quantity} sold`
+        : "No sales data",
+      icon: <TrendingUp className="h-4 w-4 text-blue-600" />,
+    },
+    {
+      title: "Most Unsold",
+      value: pie?.mostUnsold?.inventory || "N/A",
+      subtitle: pie?.mostUnsold?.quantity
+        ? `${pie.mostUnsold.quantity} units`
+        : "In stock",
+      icon: <Clock3 className="h-4 w-4 text-slate-500" />,
+    },
+    {
+      title: "Revenue",
+      value: formatCurrency(pie?.totalRevenue || 0),
+      icon: <DollarSign className="h-4 w-4 text-emerald-600" />,
+    },
+    {
+      title: "Profit",
+      value: formatCurrency(pie?.totalProfit || 0),
+      icon: <Activity className="h-4 w-4 text-violet-600" />,
+    },
+  ];
 
   return (
     <section className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Dashboard Overview
+        </h1>
+        <Button variant="ghost" size="icon" onClick={handleRefresh}>
+          <RefreshCcw className="h-4 w-4" />
+        </Button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="bg-gradient-to-br from-card to-muted/20">
           <CardHeader className="pb-2">
-            <CardDescription>Total Inventory Value</CardDescription>
-            <CardTitle className="text-2xl">
-              {formatCurrency(summary.totalInventoryValue)}
+            <CardDescription className="font-medium text-primary/80">
+              Total Inventory Value
+            </CardDescription>
+            <CardTitle className="text-3xl font-extrabold tracking-tight">
+              {formatCurrency(summary?.totalInventoryValue || 0)}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2 text-xs text-muted-foreground">
             <Box className="h-4 w-4" />
-            Updated from inventory snapshot
+            Live valuation based on current stock and purchase prices
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-card to-amber-500/5 border-amber-500/10">
           <CardHeader className="pb-2">
-            <CardDescription>Lowest Stock</CardDescription>
-            <CardTitle className="text-2xl">
-              {summary.lowestStock.inventory}
+            <CardDescription className="font-medium text-amber-600 dark:text-amber-400">
+              Lowest Stock Alert
+            </CardDescription>
+            <CardTitle className="text-3xl font-extrabold tracking-tight">
+              {summary?.lowestStock?.inventory || "Optimal Levels"}
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center gap-2 text-xs text-amber-600">
+          <CardContent className="flex items-center gap-2 text-xs text-amber-600/80">
             <AlertTriangle className="h-4 w-4" />
-            {summary.lowestStock.quantity} units left
+            {summary?.lowestStock
+              ? `${summary.lowestStock.quantity} units remaining`
+              : "All items have sufficient stock"}
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <CardTitle>Analytics Overview</CardTitle>
+      <Card className="border-none shadow-sm ring-1 ring-border">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle>Inventory Intelligence</CardTitle>
               <CardDescription>
-                Mirrors the mobile home dashboard structure.
+                Detailed breakdown and movement analysis for your business
+                performance.
               </CardDescription>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {chipOptions.map((chip) => (
+            <div className="flex items-center gap-1.5 p-1 bg-muted/30 rounded-lg">
+              {timeFrameOptions.map((option) => (
                 <Button
-                  key={chip}
+                  key={option.value}
                   type="button"
                   size="sm"
-                  variant={timeFrame === chip ? "default" : "outline"}
-                  onClick={() => setTimeFrame(chip)}
+                  variant={timeFrame === option.value ? "default" : "ghost"}
+                  onClick={() => setTimeFrame(option.value as TimeFrame)}
+                  className="h-8 text-[11px] font-semibold uppercase tracking-wider px-3"
                 >
-                  {chip}d
+                  {option.label}
                 </Button>
               ))}
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-8">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {cards.map((card) => {
-              const icon =
-                card.title === "Best Selling" ? (
-                  <TrendingUp className="h-4 w-4 text-blue-600" />
-                ) : card.title === "Most Unsold" ? (
-                  <Clock3 className="h-4 w-4 text-slate-500" />
-                ) : card.title === "Revenue" ? (
-                  <DollarSign className="h-4 w-4 text-emerald-600" />
-                ) : (
-                  <Activity className="h-4 w-4 text-violet-600" />
-                );
-
-              return (
-                <Card key={card.title}>
-                  <CardHeader className="pb-2">
-                    <CardDescription className="flex items-center gap-2">
-                      {icon}
-                      {card.title}
-                    </CardDescription>
-                    <CardTitle className="text-xl">{card.value}</CardTitle>
-                  </CardHeader>
-                  {card.subtitle && (
-                    <CardContent className="pt-0 text-xs text-muted-foreground">
-                      {card.subtitle}
-                    </CardContent>
-                  )}
-                </Card>
-              );
-            })}
+            {quickStats.map((card) => (
+              <Card
+                key={card.title}
+                className="bg-muted/10 border-none transition-colors hover:bg-muted/20"
+              >
+                <CardHeader className="pb-2">
+                  <CardDescription className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                    {card.icon}
+                    {card.title}
+                  </CardDescription>
+                  <CardTitle className="text-xl font-bold truncate">
+                    {card.value}
+                  </CardTitle>
+                </CardHeader>
+                {card.subtitle && (
+                  <CardContent className="pt-0 text-[11px] text-muted-foreground font-medium">
+                    {card.subtitle}
+                  </CardContent>
+                )}
+              </Card>
+            ))}
           </div>
 
-          <Separator />
+          <Separator className="opacity-50" />
 
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="border-dashed">
-              <CardHeader>
-                <CardTitle className="text-base">Performance Breakdown</CardTitle>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="overflow-hidden border-none bg-card/50">
+              <CardHeader className="pb-0">
+                <CardTitle className="text-sm font-semibold uppercase tracking-tight text-muted-foreground">
+                  Performance Breakdown
+                </CardTitle>
                 <CardDescription>
-                  Reserved for pie chart component like mobile.
+                  Top product distribution by quantity
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-44 rounded-md bg-muted/40" />
+              <CardContent className="pt-4 px-0">
+                <PerformanceChart data={pie} />
+              </CardContent>
             </Card>
-            <Card className="border-dashed">
-              <CardHeader>
-                <CardTitle className="text-base">Revenue vs Profit Trend</CardTitle>
+
+            {/* <Card className="overflow-hidden border-none bg-card/50">
+              <CardHeader className="pb-0">
+                <CardTitle className="text-sm font-semibold uppercase tracking-tight text-muted-foreground">
+                  Growth Trend
+                </CardTitle>
                 <CardDescription>
-                  Reserved for trend chart component.
+                  Revenue and profit comparison over time
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-44 rounded-md bg-muted/40" />
-            </Card>
+              <CardContent className="pt-4 px-0">
+                <TrendChart data={profit} />
+              </CardContent>
+            </Card> */}
           </div>
         </CardContent>
       </Card>

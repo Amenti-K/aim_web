@@ -2,10 +2,8 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Pencil, Trash2, Calendar, User, FileText } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import {
   useDeletePurchase,
@@ -13,7 +11,6 @@ import {
 } from "@/api/purchase/api.purchase";
 import { usePermissions } from "@/hooks/permission.hook";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
-import { formatDate } from "@/lib/formatter";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +21,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { OrderHeaderCard } from "@/components/common/OrderHeaderCard";
+import { ItemList } from "@/components/common/ItemList";
+import { PaymentList } from "@/components/common/PaymentList";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function PurchaseDetailPage() {
   const { id } = useParams();
@@ -50,6 +56,7 @@ export default function PurchaseDetailPage() {
   const purchase = data.data;
   const purchaseItems = purchase.purchaseItems || [];
   const purchasePayments = purchase.purchasePayments || [];
+  
   const subtotal = purchaseItems.reduce(
     (sum: number, item: any) =>
       sum + Number(item.unitPrice || 0) * Number(item.quantity || 0),
@@ -64,192 +71,132 @@ export default function PurchaseDetailPage() {
   const loanAmount = Number(purchase.loan?.amount || 0);
   const poNumber = `PO-${purchase.id.slice(-6).toUpperCase()}`;
 
+  const handleDelete = () => {
+    deletePurchase.mutate(
+      { id: purchaseId },
+      {
+        onSuccess: () => router.push("/app/purchase"),
+      },
+    );
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">{poNumber}</h1>
-            <p className="text-sm text-muted-foreground">
-              Structured purchase details and payment breakdown.
-            </p>
+    <div className="flex flex-col gap-8 pb-10">
+      {/* Top Action Bar */}
+      <div className="flex items-center justify-between px-1">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => router.back()}
+          className="rounded-xl hover:bg-card"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Back to Purchases</span>
+          <span className="sm:hidden">Back</span>
+        </Button>
+
+        <div className="flex items-center gap-2">
+          {/* Desktop Actions */}
+          <div className="hidden sm:flex items-center gap-2">
+            {hasUpdateAccess && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl"
+                onClick={() => router.push(`/app/purchase/${purchaseId}/edit`)}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            )}
+            {hasDeleteAccess && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="rounded-xl"
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            )}
+          </div>
+
+          {/* Mobile Actions Overlay */}
+          <div className="sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 rounded-xl">
+                {hasUpdateAccess && (
+                  <DropdownMenuItem onClick={() => router.push(`/app/purchase/${purchaseId}/edit`)}>
+                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                  </DropdownMenuItem>
+                )}
+                {hasDeleteAccess && (
+                  <DropdownMenuItem 
+                    className="text-destructive font-medium"
+                    onClick={() => setIsDeleteOpen(true)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-        <div className="flex gap-2">
-          {hasUpdateAccess && (
-            <Button
-              variant="outline"
-              onClick={() => router.push(`/app/purchase/${purchaseId}/edit`)}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-          )}
-          {hasDeleteAccess && (
-            <Button
-              variant="destructive"
-              onClick={() => setIsDeleteOpen(true)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          )}
+      </div>
+
+      {/* Main Content Sections */}
+      <div className="flex flex-col gap-8">
+        <OrderHeaderCard
+          orderNumber={poNumber}
+          partner={purchase.partner}
+          createdAt={purchase.createdAt}
+          description={purchase.description}
+          totalAmount={subtotal}
+          paidAmount={paidAmount}
+          loanAmount={loanAmount}
+          type="purchase"
+          lastAuditLog={purchase.lastAuditLog}
+        />
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          {/* Items List - Takes more space on large screens */}
+          <div className="lg:col-span-7">
+            <ItemList items={purchaseItems} type="purchase" />
+          </div>
+
+          {/* Payments List - Right sidebar on large screens */}
+          <div className="lg:col-span-5">
+            <PaymentList
+              payments={purchasePayments}
+              cashPayment={purchase.purchaseCashPayment}
+              loan={purchase.loan}
+              type="purchase"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Purchase Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="flex items-center gap-3">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Supplier</p>
-                <p className="font-medium">{purchase.partner?.name || "N/A"}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Created At</p>
-                <p className="font-medium">{formatDate(purchase.createdAt)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 md:col-span-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Description</p>
-                <p className="font-medium">{purchase.description || "-"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Amounts</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Subtotal</span>
-              <span className="font-semibold">{subtotal.toLocaleString()} ETB</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Paid</span>
-              <span className="font-semibold text-green-600">
-                {paidAmount.toLocaleString()} ETB
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Loan</span>
-              <span className="font-semibold text-orange-600">
-                {loanAmount.toLocaleString()} ETB
-              </span>
-            </div>
-            <Badge variant="outline" className="w-full justify-center">
-              {paidAmount >= subtotal ? "Paid" : "Pending"}
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Items</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {purchaseItems.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No items found.</p>
-          ) : (
-            purchaseItems.map((item: any, index: number) => (
-              <div
-                key={item.id || `${item.inventory?.name}-${index}`}
-                className="flex items-center justify-between rounded-md border p-3"
-              >
-                <div>
-                  <p className="font-medium">{item.inventory?.name || "Unknown Item"}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Qty: {Number(item.quantity || 0).toLocaleString()} x{" "}
-                    {Number(item.unitPrice || 0).toLocaleString()} ETB
-                  </p>
-                </div>
-                <p className="font-semibold">
-                  {(Number(item.quantity || 0) * Number(item.unitPrice || 0)).toLocaleString()} ETB
-                </p>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Payments</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {purchasePayments.length === 0 && !purchase.purchaseCashPayment ? (
-            <p className="text-sm text-muted-foreground">No payment records found.</p>
-          ) : (
-            <>
-              {purchasePayments.map((payment: any) => (
-                <div
-                  key={payment.id}
-                  className="flex items-center justify-between rounded-md border p-3"
-                >
-                  <div>
-                    <p className="font-medium">{payment.account?.name || "Bank Payment"}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {payment.description || "No description"}
-                    </p>
-                  </div>
-                  <p className="font-semibold">{Number(payment.amount || 0).toLocaleString()} ETB</p>
-                </div>
-              ))}
-              {purchase.purchaseCashPayment && (
-                <div className="flex items-center justify-between rounded-md border p-3">
-                  <div>
-                    <p className="font-medium">Cash Payment</p>
-                    <p className="text-sm text-muted-foreground">
-                      {purchase.purchaseCashPayment.description || "No description"}
-                    </p>
-                  </div>
-                  <p className="font-semibold">
-                    {Number(purchase.purchaseCashPayment.amount || 0).toLocaleString()} ETB
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
-
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete purchase?</AlertDialogTitle>
+            <AlertDialogTitle>Delete permanently?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. The purchase and related entries will be permanently deleted.
+              You are about to delete purchase <span className="font-bold text-foreground">{poNumber}</span>. This will also remove associated inventory increments and financial records. This action is irreversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="rounded-xl">Keep Purchase</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() =>
-                deletePurchase.mutate(
-                  { id: purchaseId },
-                  {
-                    onSuccess: () => router.push("/app/purchase"),
-                  },
-                )
-              }
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+              onClick={handleDelete}
             >
-              Delete
+              Confirm Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

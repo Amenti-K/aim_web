@@ -2,46 +2,25 @@ import { useMutate, useFetch, useInfiniteFetch } from "@/hooks/query.hook";
 import endpoints from "@/lib/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
+import {
+  IWarehouse,
+  IWarehouseResponse,
+  IWarehouseSelectResponse,
+  IWarehouseDetail,
+  INewWarehouse,
+} from "@/components/interface/warehouse/warehouse.interface";
+import { IResponse } from "@/components/interface/common.interface";
 
-export interface IWarehouse {
-  id: string;
-  name: string;
-  location?: string;
-  contactPhone?: string;
-  description?: string;
-  isInternal: boolean;
-}
-
-export interface INewWarehouse {
-  name: string;
-  location?: string;
-  contactPhone?: string;
-  description?: string;
-  isInternal: boolean;
-}
-
-export interface IWarehouseResponse {
-  data: IWarehouse[];
-  meta: any;
-}
-
-export interface IWarehouseSelector {
-  id: string;
-  name: string;
-  isInternal: boolean;
-  location: string;
-}
-
-export interface IWarehouseSelectResponse {
-  data: IWarehouseSelector[];
-}
-
-export interface BulkWarehouse {
+interface BulkWarehouse {
   warehouses: Array<Partial<INewWarehouse>>;
 }
 
 const onErrorNotification = (error: any) => {
-  toast.error(error.response?.data?.message || error.response?.data?.msg || "An error occurred");
+  toast.error(
+    error.response?.data?.message ||
+      error.response?.data?.msg ||
+      "An error occurred",
+  );
 };
 
 const onSuccessNotification = (data: any) => {
@@ -50,7 +29,7 @@ const onSuccessNotification = (data: any) => {
 
 export const useGetWarehousesInfinite = (
   filterOptions?: Record<string, any>,
-  enabled?: boolean
+  enabled?: boolean,
 ) => {
   const { search, ...filter } = filterOptions ?? { search: undefined };
   const queryParams = {
@@ -90,7 +69,7 @@ export const useUpdateWarehouse = (id: string) => {
 };
 
 export const useFetchWarehouseById = (id: string, enabled?: boolean) => {
-  return useFetch<any>(`${endpoints.WAREHOUSE}/${id}`, {
+  return useFetch<IResponse<IWarehouseDetail>>(`${endpoints.WAREHOUSE}/${id}`, {
     queryKey: queryKeys.warehouses.detail(id),
     enabled: enabled ?? !!id,
   });
@@ -110,6 +89,6 @@ export const useDeleteWarehouse = () => {
       onError: onErrorNotification,
       onSuccess: () => onSuccessNotification("Warehouse Deleted successfully!"),
       queryKey: queryKeys.warehouses.root,
-    }
+    },
   );
 };

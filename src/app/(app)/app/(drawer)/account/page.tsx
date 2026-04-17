@@ -5,25 +5,12 @@ import {
   useGetAccountsInfinite,
   useGetSummary,
   useCreateAccount,
-  useUpdateAccount,
-  useDeleteAccount,
-  useTransferFunds,
 } from "@/api/account/api.account";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  MoreHorizontal,
-  Wallet,
-  ArrowUpRight,
-  ArrowDownLeft,
-  ArrowLeftRight,
-  Pencil,
-  Trash2,
-  Eye,
-} from "lucide-react";
+import { Plus, Wallet, Eye, EyeOff, ChevronRight } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -32,12 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -45,48 +26,29 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import AccountForm from "@/components/account/AccountForm";
-import TransferFundsForm from "@/components/account/TransferFundsForm";
-import { IAccountDetail, IAccountTransfer } from "@/components/interface/interface.account";
+import AccountForm from "@/components/forms/account/AccountForm";
+import { IAccountDetail } from "@/components/interface/interface.account";
 import { useRouter } from "next/navigation";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { BankAvatar } from "@/components/account/BankAvatar";
 
 export default function AccountPage() {
   const router = useRouter();
-  const { canView, canCreate, canUpdate, canDelete } = usePermissions();
+  const { canView, canCreate } = usePermissions();
   const hasViewAccess = canView("ACCOUNT");
   const hasCreateAccess = canCreate("ACCOUNT");
-  const hasUpdateAccess = canUpdate("ACCOUNT");
-  const hasDeleteAccess = canDelete("ACCOUNT");
 
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isTransferOpen, setIsTransferOpen] = useState(false);
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<IAccountDetail | null>(null);
+  const [showTotalBalance, setShowTotalBalance] = useState(true);
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useGetAccountsInfinite({}, hasViewAccess);
+  const { data, isLoading, isError, refetch } = useGetAccountsInfinite(
+    {},
+    hasViewAccess,
+  );
 
-  const { data: summaryData, refetch: refetchSummary } = useGetSummary(hasViewAccess);
+  const { data: summaryData, refetch: refetchSummary } =
+    useGetSummary(hasViewAccess);
 
   const createAccount = useCreateAccount();
-  const updateAccount = useUpdateAccount();
-  const deleteAccount = useDeleteAccount();
-  const transferFunds = useTransferFunds();
 
   const accounts = React.useMemo(() => {
     return data?.pages?.flatMap((page) => (page as any).data) ?? [];
@@ -109,243 +71,181 @@ export default function AccountPage() {
     });
   };
 
-  const handleUpdate = (formData: any) => {
-    updateAccount.mutate(formData, {
-      onSuccess: () => {
-        setIsEditOpen(false);
-        refetch();
-        refetchSummary();
-      },
-    });
-  };
-
-  const handleDelete = () => {
-    if (selectedAccount) {
-      deleteAccount.mutate(
-        { id: selectedAccount.id },
-        {
-          onSuccess: () => {
-            setIsDeleteAlertOpen(false);
-            refetch();
-            refetchSummary();
-          },
-        }
-      );
-    }
-  };
-
-  const handleTransfer = (data: IAccountTransfer) => {
-    transferFunds.mutate(data, {
-      onSuccess: () => {
-        setIsTransferOpen(false);
-        refetch();
-        refetchSummary();
-      },
-    });
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Accounts</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your cash, bank, and mobile money accounts.
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+            Accounts
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your financial accounts and track your performance.
           </p>
         </div>
         <div className="flex gap-2">
           {hasCreateAccess && (
-            <Button className="w-full sm:w-auto" onClick={() => setIsAddOpen(true)}>
+            <Button
+              className="w-full sm:w-auto shadow-sm hover:shadow-md transition-all rounded-full px-6"
+              onClick={() => setIsAddOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" /> Add Account
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Number(summaryData?.totalBalance || 0).toLocaleString()} ETB
+      <div className="flex justify-center px-4">
+        <Card className="w-full max-w-2xl bg-gradient-to-br from-primary/10 via-background to-background border-none shadow-sm overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-primary/10 text-primary">
+                  <Wallet className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Total Balance
+                  </p>
+                  <div className="text-2xl sm:text-3xl font-bold tracking-tight text-primary">
+                    {showTotalBalance
+                      ? `${Number(summaryData?.totalBalance || 0).toLocaleString()} ETB`
+                      : "•••••• ETB"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 rounded-full border-primary/20 hover:bg-primary/5 shadow-sm"
+                  onClick={() => setShowTotalBalance(!showTotalBalance)}
+                >
+                  {showTotalBalance ? (
+                    <Eye className="h-4 w-4" />
+                  ) : (
+                    <EyeOff className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Combined across {accounts.length} accounts
+            <p className="text-xs text-muted-foreground mt-2 flex items-center">
+              <Wallet className="mr-1.5 h-3.5 w-3.5" />
+              Across {accounts.length} active accounts
             </p>
           </CardContent>
         </Card>
-        {/* These might need real data from backend if summary provides them */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Inflow</CardTitle>
-            <ArrowUpRight className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              +{Number(summaryData?.monthlyInflow || 0).toLocaleString()} ETB
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Outflow</CardTitle>
-            <ArrowDownLeft className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              -{Number(summaryData?.monthlyOutflow || 0).toLocaleString()} ETB
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-      <div className="rounded-md border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Account Name</TableHead>
-              <TableHead>Bank / Institution</TableHead>
-              <TableHead>Branch</TableHead>
-              <TableHead>Account Number</TableHead>
-              <TableHead className="text-right">Current Balance</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {accounts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No accounts found.
-                </TableCell>
+      <div className="bg-card rounded-2xl border shadow-sm overflow-hidden mx-auto w-full">
+        <div className="w-full">
+          <Table className="w-full">
+            <TableHeader className="bg-muted/50">
+              <TableRow className="hover:bg-transparent border-none">
+                <TableHead className="font-semibold py-4 pl-6">
+                  Account
+                </TableHead>
+                <TableHead className="font-semibold py-4 hidden sm:table-cell">
+                  Details
+                </TableHead>
+                <TableHead className="font-semibold py-4 text-right pr-6">
+                  Balance
+                </TableHead>
+                <TableHead className="w-12 pr-4"></TableHead>
               </TableRow>
-            ) : (
-              accounts.map((acc: IAccountDetail) => (
-                <TableRow key={acc.id} className="cursor-pointer" onClick={() => router.push(`/app/account/${acc.id}`)}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4 text-muted-foreground" />
-                      {acc.name}
+            </TableHeader>
+            <TableBody>
+              {accounts.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="h-48 text-center text-muted-foreground"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <Wallet className="h-10 w-10 opacity-20" />
+                      <p>No accounts found.</p>
+                      {hasCreateAccess && (
+                        <Button
+                          variant="link"
+                          onClick={() => setIsAddOpen(true)}
+                        >
+                          Create your first account
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
-                  <TableCell className="capitalize">{acc.bank?.toLowerCase().replace(/_/g, " ")}</TableCell>
-                  <TableCell>{acc.branch || "-"}</TableCell>
-                  <TableCell className="font-mono">{acc.number || "-"}</TableCell>
-                  <TableCell className="text-right font-bold">
-                    {Number(acc.balance).toLocaleString()} ETB
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => router.push(`/app/account/${acc.id}`)}>
-                          <Eye className="mr-2 h-4 w-4" /> View Transactions
-                        </DropdownMenuItem>
-                        {hasUpdateAccess && (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedAccount(acc);
-                              setIsEditOpen(true);
-                            }}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" /> Edit Details
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedAccount(acc);
-                            setIsTransferOpen(true);
-                          }}
-                        >
-                          <ArrowLeftRight className="mr-2 h-4 w-4" /> Transfer Funds
-                        </DropdownMenuItem>
-                        {hasDeleteAccess && (
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => {
-                              setSelectedAccount(acc);
-                              setIsDeleteAlertOpen(true);
-                            }}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete Account
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                accounts.map((acc: IAccountDetail) => (
+                  <TableRow
+                    key={acc.id}
+                    className="cursor-pointer group transition-colors hover:bg-muted/50 border-b last:border-0"
+                    onClick={() => router.push(`/app/account/${acc.id}`)}
+                  >
+                    <TableCell className="py-4 pl-6">
+                      <div className="flex items-center gap-3">
+                        <BankAvatar name={acc.bank} type={acc.type} size={40} />
+                        <div className="flex flex-col">
+                          <span className="font-bold text-sm sm:text-base text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                            {acc.name}
+                          </span>
+                          <span className="text-[10px] sm:text-xs text-muted-foreground capitalize sm:hidden">
+                            {acc.bank?.toLowerCase().replace(/_/g, " ")}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 hidden sm:table-cell">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground capitalize">
+                          {acc.type === "Cash"
+                            ? "Physical Cash"
+                            : acc.bank?.toLowerCase().replace(/_/g, " ")}
+                        </span>
+                        <span className="text-xs text-muted-foreground line-clamp-1">
+                          {acc.type === "Cash"
+                            ? "Internal Vault"
+                            : `${acc.branch || "General"} • ${acc.number || "---"}`}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 text-right pr-6">
+                      <div className="flex flex-col items-end">
+                        <span className="font-bold text-sm sm:text-base text-foreground">
+                          {showTotalBalance
+                            ? `${Number(acc.balance).toLocaleString()} ETB`
+                            : "••••••"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground sm:hidden">
+                          Balance
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 pr-4 text-right">
+                      <ChevronRight className="h-5 w-5 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:text-primary transition-all transform group-hover:translate-x-1" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      {/* Modals */}
+      {/* Add Modal */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Add New Account</DialogTitle>
-          </DialogHeader>
-          <AccountForm onSave={handleCreate} loading={createAccount.isPending} />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Account</DialogTitle>
+            <DialogTitle className="text-xl font-bold">
+              Add New Account
+            </DialogTitle>
           </DialogHeader>
           <AccountForm
-            mode="edit"
-            data={selectedAccount || {}}
-            onSave={handleUpdate}
-            loading={updateAccount.isPending}
+            onSave={handleCreate}
+            loading={createAccount.isPending}
           />
         </DialogContent>
       </Dialog>
-
-      <Dialog open={isTransferOpen} onOpenChange={setIsTransferOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Transfer Funds</DialogTitle>
-          </DialogHeader>
-          <TransferFundsForm
-            fromAccountId={selectedAccount?.id || ""}
-            accounts={accounts}
-            onTransfer={handleTransfer}
-            loading={transferFunds.isPending}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              account <strong>{selectedAccount?.name}</strong> and all associated
-              transaction history.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={handleDelete}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
-

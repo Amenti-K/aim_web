@@ -22,7 +22,10 @@ import SelectField from "@/components/forms/fields/SelectField";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { AuditAction, EntityType } from "@/components/interface/auditLog/interface.audit";
+import {
+  AuditAction,
+  EntityType,
+} from "@/components/interface/auditLog/interface.audit";
 import {
   Dialog,
   DialogContent,
@@ -72,7 +75,7 @@ export default function AuditPage() {
 
   const actionOptions = React.useMemo(
     () => [
-      { label: "All actions", value: "" as AuditAction },
+      { label: "All actions", value: "ALL" as AuditAction },
       ...Object.values(AuditAction).map((action) => ({
         label: action,
         value: action,
@@ -82,7 +85,7 @@ export default function AuditPage() {
   );
   const entityOptions = React.useMemo(
     () => [
-      { label: "All entities", value: "" as EntityType },
+      { label: "All entities", value: "All" as EntityType },
       ...Object.values(EntityType).map((entity) => ({
         label: entity,
         value: entity,
@@ -239,17 +242,23 @@ export default function AuditPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Date</p>
-                  <p className="font-medium">{formatDate(selectedLog.createdAt)}</p>
+                  <p className="font-medium">
+                    {formatDate(selectedLog.createdAt)}
+                  </p>
                 </div>
               </div>
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">Old values</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Old values
+                </p>
                 <pre className="overflow-auto rounded-md bg-muted p-3 text-xs">
                   {JSON.stringify(selectedLog.oldValues ?? {}, null, 2)}
                 </pre>
               </div>
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">New values</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  New values
+                </p>
                 <pre className="overflow-auto rounded-md bg-muted p-3 text-xs">
                   {JSON.stringify(selectedLog.newValues ?? {}, null, 2)}
                 </pre>

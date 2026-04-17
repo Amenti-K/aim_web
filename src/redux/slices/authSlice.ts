@@ -11,16 +11,37 @@ interface AuthState {
 }
 
 const COOKIE_KEY = "admin_auth";
+const COOKIE_OPTIONS: Cookies.CookieAttributes = {
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  expires: 7,
+  path: "/",
+};
 
-const getInitialState = (): AuthState => {
+function getInitialState(): AuthState {
+  if (typeof window === "undefined") {
+    return {
+      accessToken: null,
+      refreshToken: null,
+      admin: null,
+      loading: false,
+      error: null,
+    };
+  }
+
   try {
     const data = Cookies.get(COOKIE_KEY);
     if (data) {
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      return {
+        accessToken: parsed.accessToken ?? null,
+        refreshToken: parsed.refreshToken ?? null,
+        admin: parsed.admin ?? null,
+        loading: false,
+        error: null,
+      };
     }
-  } catch {
-    // ignore corrupted cookie
-  }
+  } catch {}
 
   return {
     accessToken: null,
@@ -29,13 +50,22 @@ const getInitialState = (): AuthState => {
     loading: false,
     error: null,
   };
-};
+}
 
-const initialState: AuthState = getInitialState();
+const saveToCookie = (state: AuthState) => {
+  try {
+    const { accessToken, refreshToken, admin } = state;
+    Cookies.set(
+      COOKIE_KEY,
+      JSON.stringify({ accessToken, refreshToken, admin }),
+      COOKIE_OPTIONS,
+    );
+  } catch {}
+};
 
 const authSlice = createSlice({
   name: "adminAuth",
-  initialState,
+  initialState: getInitialState(),
   reducers: {
     login(
       state,
@@ -48,42 +78,18 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.admin = action.payload.admin;
-
-      Cookies.set(
-        COOKIE_KEY,
-        JSON.stringify({
-          accessToken: state.accessToken,
-          refreshToken: state.refreshToken,
-          admin: state.admin,
-        }),
-        {
-          secure: true,
-          sameSite: "strict",
-          expires: 1, // 1 day
-          path: "/",
-        }
-      );
+      saveToCookie(state);
     },
 
     updateAccessToken(state, action: PayloadAction<string>) {
       state.accessToken = action.payload;
-
-      const cookie = Cookies.get(COOKIE_KEY);
-      if (!cookie) return;
-
-      const parsed = JSON.parse(cookie);
-      Cookies.set(
-        COOKIE_KEY,
-        JSON.stringify({ ...parsed, accessToken: action.payload }),
-        { secure: true, sameSite: "strict", expires: 1, path: "/" }
-      );
+      saveToCookie(state);
     },
 
     logout(state) {
       state.accessToken = null;
       state.refreshToken = null;
       state.admin = null;
-
       Cookies.remove(COOKIE_KEY);
     },
   },

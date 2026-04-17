@@ -1,7 +1,11 @@
+import { ILastAudit } from "../auditLog/interface.audit";
 import { IAccount } from "../interface.account";
 import { IInventory } from "../inventory/inventory.interface";
 import { ILoanTranx } from "../loan/loan.interface";
-import { IPartner as IPartnerView } from "../partner/partner.interfacce";
+import {
+  IPartner,
+  IPartner as IPartnerView,
+} from "../partner/partner.interfacce";
 import { IWarehouse } from "../warehouse/warehouse.interface";
 
 export interface IPurchaseItem {
@@ -18,7 +22,7 @@ export interface IPaymentItem {
   accountId: string;
 }
 
-export interface ICashPayment {
+export interface IPurchaseCashPayment {
   amount: number;
   description?: string;
 }
@@ -26,24 +30,18 @@ export interface ICashPayment {
 export interface INewPurchase {
   description?: string;
   partnerId: string;
-  warehouseId?: string;
   purchaseItems: IPurchaseItem[];
   paymentItems: IPaymentItem[];
-  cashPayments?: ICashPayment;
+  purchaseCashPayment?: IPurchaseCashPayment;
 }
 
-export interface IPartner {
-  name: string;
-  phone: string;
-}
 export interface IPurchaseInventory {
   name: string;
 }
 
 export interface IPurchase {
   id: string;
-  orderDate: string;
-  receiveDate: string;
+  createdAt: string;
   description?: string;
   partnerId?: string;
   partner: IPartner;
@@ -75,8 +73,9 @@ export interface IPurchaseView extends IPurchase {
   partner: IPartnerView;
   purchaseItems: PurchaseItem[];
   purchasePayments?: IPurchasePaymentItem[];
-  cashPayments?: ICashPayment;
+  purchaseCashPayment?: IPurchaseCashPayment;
   loan?: ILoanTranx;
+  lastAuditLog: ILastAudit;
 }
 
 export interface PurchaseItem {

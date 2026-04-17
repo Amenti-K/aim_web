@@ -1,8 +1,6 @@
 export interface AnalyticsSummary {
   totalInventoryValue: number;
-  bestSelling: { inventory: string; quantity: number };
   lowestStock: { inventory: string; quantity: number };
-  mostUnsold: { inventory: string; quantity: number };
 }
 
 export interface ChartPoint {
@@ -26,7 +24,6 @@ export interface AnalyticsCharts {
 
 export interface AnalyticsResponse {
   summary: AnalyticsSummary;
-  charts: AnalyticsCharts;
 }
 
 export interface SinglePieChart {
@@ -35,6 +32,14 @@ export interface SinglePieChart {
 }
 
 export interface PieChartResponse {
+  bestSelling: { inventory: string; quantity: number };
+  mostUnsold: { inventory: string; quantity: number };
+  totalProfit: number;
+  totalRevenue: number;
+  totalPurchaseValue: number;
+  netCashFlow: number;
+  totalQtySold: number;
+  transactionCount: number;
   chartData: SinglePieChart[];
 }
 

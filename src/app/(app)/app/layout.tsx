@@ -12,24 +12,22 @@ export default function AppRouteLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname() || "";
+
   const { accessToken, company, loading } = useAppSelector(
     (state) => state.userAuth,
   );
-  const [isReady, setIsReady] = useState(false);
+
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsReady(true);
+    setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!isMounted) return;
 
     const isAuthPage = pathname.startsWith("/app/auth");
-    const isBlockedPage = pathname.startsWith("/app/blocked");
     const isSetupPage = pathname.startsWith("/app/setup");
-    const isBillingPage =
-      pathname.includes("/subscription/billing") ||
-      pathname.includes("/blocked");
 
     // Step 1: Auth check
     if (!accessToken) {
@@ -52,12 +50,9 @@ export default function AppRouteLayout({
     if (company?.setupStep === 4 && (isAuthPage || isAppRoot)) {
       router.replace("/app/dashboard");
     }
+  }, [isMounted, accessToken, company, pathname, router]);
 
-    // (Subscription checks will be integrated here in later phases)
-  }, [isReady, accessToken, company, pathname, router]);
-
-  // Flash protection during hydration
-  if (!isReady || loading) {
+  if (!isMounted || loading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

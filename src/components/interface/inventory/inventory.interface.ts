@@ -1,6 +1,25 @@
+import { ILastAudit } from "../auditLog/interface.audit";
 import { IPurchaseItem } from "../purchase/purchase.interface";
-import { ISale, ISellItem } from "../sells/interface.sells";
+import { ISellItem } from "../sales/interface.sale";
 import { IWarehouse } from "../warehouse/warehouse.interface";
+
+export enum StockStatus {
+  ALL = "all",
+  LOW = "low",
+  OUT = "out",
+}
+
+export enum TimeFrame {
+  LAST_30_DAYS = "LAST_30_DAYS",
+  LAST_90_DAYS = "LAST_90_DAYS",
+  LAST_180_DAYS = "LAST_180_DAYS",
+  LAST_365_DAYS = "LAST_365_DAYS",
+}
+
+export interface IInventoryFilters {
+  search?: string;
+  stockStatus?: StockStatus;
+}
 
 export interface INewInventory {
   sku: string;
@@ -39,10 +58,7 @@ export interface IInventory {
   unit?: string;
   initialQuantity: number;
   warehouseInventories: IWarehouseInventory[];
-}
-
-export interface IInventoryResponse {
-  data: IInventory[];
+  hasTransactions: boolean;
 }
 
 export interface IInventoryDetail extends IInventory {
@@ -56,6 +72,7 @@ export interface IInventoryDetail extends IInventory {
     warehouseId: string;
     warehouse: IWarehouse;
   }[];
+  lastAuditLog: ILastAudit;
 }
 
 export interface IInventoryFormProps {
@@ -85,11 +102,17 @@ export interface IWarehouseInventorySelector {
   inventoryId: string;
   warehouseId: string;
   quantity: string;
+  warehouse: {
+    name: string;
+    isInternal: boolean;
+  };
 }
 
 export interface IInventorySelector {
   id: string;
   name: string;
+  boughtPrice: number;
+  sellingPrice: number;
   warehouseInventories: IWarehouseInventorySelector[];
 }
 
@@ -98,14 +121,12 @@ export interface IInventorySelectorResponse {
 }
 
 export interface ISelectorWarehouseInventory {
+  id: string;
   quantity: string | number;
   inventory: {
-    name: string;
     id: string;
-  };
-  warehosue: {
     name: string;
-    id: string;
+    unit: string;
   };
 }
 
@@ -116,4 +137,36 @@ export interface ISelectorWarehouseInventoryResponse {
 export interface IInventoryReport {
   totalMoneyInventory: number;
   totalItems: number;
+}
+
+export interface IInventoryAnalyticsAggregateTranx extends IPurchaseItem {
+  type: "purchase" | "sale";
+  createdAt: Date;
+  purchaseId?: string;
+  saleId?: string;
+}
+
+export interface IInventoryAnalytics {
+  summary: {
+    totalPurchase: number;
+    totalSale: number;
+    netMovement: number;
+    avgDailySales: number;
+  };
+  financials: {
+    totalRevenue: number;
+    totalCOGS: number;
+    totalProfit: number;
+    profitMargin: number;
+    avgPurchasePrice: number;
+    avgSalePrice: number;
+  };
+  analysis: {
+    topPerformingWarehouses: {
+      name: string;
+      totalSold: number;
+      revenue: number;
+    }[];
+  };
+  history: IInventoryAnalyticsAggregateTranx[];
 }

@@ -1,6 +1,8 @@
+import { ILastAudit } from "../auditLog/interface.audit";
 import { IAccount } from "../interface.account";
 import { IInventory } from "../inventory/inventory.interface";
 import { ILoanTranx } from "../loan/loan.interface";
+import { IPartner } from "../partner/partner.interfacce";
 import { IWarehouse } from "../warehouse/warehouse.interface";
 
 export interface ISellItem {
@@ -25,15 +27,9 @@ export interface ICashPayment {
 export interface INewSale {
   description?: string;
   partnerId: string;
-  warehouseId?: string;
-  purchaseItems: ISellItem[];
-  paymentItems: IPaymentItem[];
-  cashPayments?: ICashPayment;
-}
-
-export interface IPartner {
-  name: string;
-  phone: string;
+  saleItems: ISellItem[];
+  salePayments: IPaymentItem[];
+  saleCashPayments?: ICashPayment;
 }
 
 export interface ISaleInventory {
@@ -42,19 +38,14 @@ export interface ISaleInventory {
 
 export interface ISale {
   id: string;
-  orderDate: string;
-  receiveDate: string;
+  createdAt: string;
   description?: string;
   partnerId?: string;
   partner?: IPartner;
   saleItems: {
-    id: string;
     inventory: ISaleInventory;
     unitPrice: number | string;
     quantity: number;
-    warehouse?: {
-      name: string;
-    };
   }[];
   total: number;
 }
@@ -76,9 +67,10 @@ export interface ISaleDailyResponse {
 export interface ISaleView extends ISale {
   partner?: IPartner;
   saleItems: SaleItem[];
-  salePayment: ISalePaymentItem[];
+  salePayments: ISalePaymentItem[];
   saleCashPayment?: ICashPayment;
   loan?: ILoanTranx;
+  lastAuditLog: ILastAudit;
 }
 
 export interface SaleItem {

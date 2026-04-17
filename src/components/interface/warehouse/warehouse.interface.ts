@@ -1,5 +1,4 @@
-import { IPurchaseItem, PurchaseItem } from "../purchase/purchase.interface";
-import { ISaleInventory } from "../sells/interface.sells";
+import { ILastAudit } from "../auditLog/interface.audit";
 
 export interface INewWarehouse {
   name: string;
@@ -15,6 +14,7 @@ export interface IWarehouse {
   isInternal: boolean;
   location: string;
   contactPhone: string;
+  lastAuditLog?: ILastAudit;
 }
 
 export interface IWarehouseResponse {
@@ -30,6 +30,7 @@ export interface IWarehouseFormProps {
 export interface IWarehouseSelect {
   id: string;
   name: string;
+  isInternal: boolean;
 }
 
 export interface IWarehouseSelectResponse {
@@ -47,6 +48,7 @@ export interface IWarehouseDetail {
   warehouseInventories: IWarehouseInventoryDetail[];
   purchaseItems: IWarehouseTransactions[];
   saleItems: IWarehouseTransactions[];
+  lastAuditLog: ILastAudit;
 }
 
 export interface IWarehouseInventoryDetail {

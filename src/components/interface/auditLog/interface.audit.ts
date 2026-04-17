@@ -1,3 +1,21 @@
+import { IUser } from "../user/user.interface";
+
+export interface ILastAudit {
+  action: AuditAction;
+  user: IUser;
+  createdAt: string;
+}
+
+export interface IAudit extends ILastAudit {
+  id: string;
+  entityType: EntityType;
+  entityId: string;
+  changes?: Record<string, { from: any; to: any }>;
+  userId: string;
+  companyId: string;
+  entity?: any; // The full state of the entity
+}
+
 export enum AuditAction {
   CREATE = "CREATE",
   UPDATE = "UPDATE",
@@ -19,4 +37,11 @@ export enum EntityType {
   ROLE = "ROLE",
   SALE = "SALE",
   WAREHOUSE = "WAREHOUSE",
+  // PAYMENT
+  // RECEIVE
+  // SHIPMENTS
+  // RECEIPT
+  // REPORTS
+  // PROFILE
+  // SETTINGS
 }

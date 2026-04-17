@@ -6,11 +6,11 @@ import "./globals.css";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Provider } from "react-redux";
-import store from "@/redux/store";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "@/redux/store";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -116,21 +116,20 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Provider store={store}>
-          <ReactQueryProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <SubscriptionProvider>
-                {children}
-              </SubscriptionProvider>
-              <Toaster />
-              <SonnerToaster position="top-right" expand={true} richColors />
-            </ThemeProvider>
-
-          </ReactQueryProvider>
+          <PersistGate loading={null} persistor={persistor}>
+            <ReactQueryProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <SubscriptionProvider>{children}</SubscriptionProvider>
+                <Toaster />
+                <SonnerToaster position="top-right" expand={true} richColors />
+              </ThemeProvider>
+            </ReactQueryProvider>
+          </PersistGate>
         </Provider>
       </body>
     </html>

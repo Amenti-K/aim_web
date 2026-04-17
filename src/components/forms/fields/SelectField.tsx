@@ -44,7 +44,7 @@ const SelectField = ({
             <SelectTrigger className={error ? "border-red-500" : ""}>
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-background">
               {options.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}

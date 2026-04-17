@@ -2,31 +2,18 @@ import { useMutate, useFetch, useInfiniteFetch } from "@/hooks/query.hook";
 import endpoints from "@/lib/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
-
-export interface ILoanPartner {
-  id: string;
-  name: string;
-  totalLoan: number;
-}
-
-export interface ILoanTranx {
-  id: string;
-  amount: number;
-  description?: string;
-  type: "BORROW" | "LEND" | "REPAY_BORROW" | "REPAY_LEND";
-  createdAt: string;
-}
-
-export interface INewLoanTranx {
-  partnerId: string;
-  amount: number;
-  description?: string;
-  type: "BORROW" | "LEND" | "REPAY_BORROW" | "REPAY_LEND";
-  accountId: string;
-}
+import { IAccount } from "@/api/account/api.account";
+import {
+  INewLoanTranx,
+  IUpdateLoanTranx,
+} from "@/components/interface/loan/loan.interface";
 
 const onErrorNotification = (error: any) => {
-  toast.error(error.response?.data?.message || error.response?.data?.msg || "An error occurred");
+  toast.error(
+    error.response?.data?.message ||
+      error.response?.data?.msg ||
+      "An error occurred",
+  );
 };
 
 const onSuccessNotification = (data: any) => {
@@ -35,7 +22,7 @@ const onSuccessNotification = (data: any) => {
 
 export const useInfiniteLoanPartners = (
   enabled: boolean = true,
-  filterOptions?: Record<string, any>
+  filterOptions?: Record<string, any>,
 ) => {
   return useInfiniteFetch<any>(endpoints.LOANPARTNERS, {
     queryKey: queryKeys.loans.partners.list(filterOptions),
@@ -46,16 +33,13 @@ export const useInfiniteLoanPartners = (
 
 export const useGetLoanTransactionsInfinite = (
   partnerId: string,
-  enabled?: boolean
+  enabled?: boolean,
 ) => {
-  return useInfiniteFetch<any>(
-    endpoints.LOANPARTNERTRANX + `/${partnerId}`,
-    {
-      queryKey: queryKeys.loans.partners.transactions(partnerId),
-      params: { limit: 10 },
-      enabled: enabled ?? true,
-    }
-  );
+  return useInfiniteFetch<any>(endpoints.LOANPARTNERTRANX + `/${partnerId}`, {
+    queryKey: queryKeys.loans.partners.transactions(partnerId),
+    params: { limit: 10 },
+    enabled: enabled ?? true,
+  });
 };
 
 export const useCreateLoanTranx = () => {
@@ -67,21 +51,21 @@ export const useCreateLoanTranx = () => {
 };
 
 export const useFetchPartnersTranx = (id: string, enabled?: boolean) => {
-  return useFetch<any>(
-    endpoints.LOANTRANSACTION + `/${id}`,
-    { queryKey: queryKeys.loans.detail(id), enabled: enabled ?? !!id }
-  );
+  return useFetch<any>(endpoints.LOANTRANSACTION + `/${id}`, {
+    queryKey: queryKeys.loans.detail(id),
+    enabled: enabled ?? !!id,
+  });
 };
 
-export const useUpdateLoanTx = (id: string) => {
-  return useMutate<Partial<INewLoanTranx>>(
-    `${endpoints.LOANTRANSACTION}/${id}`,
+export const useUpdateLoanTx = () => {
+  return useMutate<IUpdateLoanTranx>(
+    (data: IUpdateLoanTranx) => `${endpoints.LOANTRANSACTION}/${data.id}`,
     "patch",
     {
       onError: onErrorNotification,
       onSuccess: () => toast.success("Loan transaction updated successfully!"),
       queryKey: queryKeys.loans.partners.root,
-    }
+    },
   );
 };
 
@@ -93,6 +77,6 @@ export const useDeleteLoanTx = () => {
       onError: onErrorNotification,
       onSuccess: () => toast.success("Loan transaction deleted successfully!"),
       queryKey: queryKeys.loans.partners.root,
-    }
+    },
   );
 };

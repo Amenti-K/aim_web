@@ -7,6 +7,7 @@ import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, MoreHorizontal, HandCoins } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -24,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function LoanPage() {
+  const router = useRouter();
   const { canView, canCreate } = usePermissions();
   const hasViewAccess = canView("LOANS");
   const hasCreateAccess = canCreate("LOANS");
@@ -49,6 +51,16 @@ export default function LoanPage() {
   if (isLoading) return <LoadingView />;
   if (isError) return <ErrorView refetch={refetch} />;
 
+  const totalGiven = loanPartners.filter((p: any) => p.balance > 0).reduce(
+    (sum: number, p: any) => sum + p.balance,
+    0
+  );
+  
+  const totalTaken = loanPartners.filter((p: any) => p.balance < 0).reduce(
+    (sum: number, p: any) => sum + Math.abs(p.balance),
+    0
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -59,10 +71,33 @@ export default function LoanPage() {
           </p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" onClick={() => router.push("/app/loan/new")}>
             <Plus className="mr-2 h-4 w-4" /> Add Partner Loan
           </Button>
         )}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border bg-card text-card-foreground shadow">
+          <div className="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+            <h3 className="tracking-tight text-sm font-medium">Total Given</h3>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="h-4 w-4 text-emerald-500"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          </div>
+          <div className="p-6 pt-0">
+            <div className="text-2xl font-bold text-emerald-600">Br {totalGiven.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">{loanPartners.filter((p: any) => p.balance > 0).length} partners</p>
+          </div>
+        </div>
+        <div className="rounded-xl border bg-card text-card-foreground shadow">
+          <div className="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+            <h3 className="tracking-tight text-sm font-medium">Total Taken</h3>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="h-4 w-4 text-red-500"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          </div>
+          <div className="p-6 pt-0">
+            <div className="text-2xl font-bold text-red-600">Br {totalTaken.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">{loanPartners.filter((p: any) => p.balance < 0).length} partners</p>
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
@@ -90,46 +125,61 @@ export default function LoanPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              loanPartners.map((lp: any) => (
-                <TableRow key={lp.id}>
-                  <TableCell className="font-medium whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <HandCoins className="h-4 w-4 text-muted-foreground" />
-                      {lp.name}
-                    </div>
-                  </TableCell>
-                  <TableCell className={`font-bold ${lp.totalLoan < 0 ? "text-red-600" : "text-green-600"}`}>
-                    ${Math.abs(Number(lp.totalLoan)).toLocaleString()}
-                    <span className="ml-1 text-[10px] font-normal text-muted-foreground uppercase">
-                      ({lp.totalLoan < 0 ? "Owed" : "Lent"})
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                      lp.totalLoan === 0 ? "bg-gray-50 text-gray-700 ring-gray-600/20" : 
-                      lp.totalLoan < 0 ? "bg-red-50 text-red-700 ring-red-600/10" : "bg-green-50 text-green-700 ring-green-600/10"
-                    }`}>
-                      {lp.totalLoan === 0 ? "Settled" : lp.totalLoan < 0 ? "Passive" : "Active"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Ledger</DropdownMenuItem>
-                        <DropdownMenuItem>Add Transaction</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Settle All
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
+              loanPartners.map((lp: any) => {
+                const balance = Number(lp.balance || lp.totalLoan || 0);
+                return (
+                  <TableRow key={lp.id} className="cursor-pointer" onClick={() => {
+                    const queryObj = new URLSearchParams({
+                      name: lp.name || "",
+                      phone: lp.phone || "",
+                      balance: balance.toString(),
+                      address: lp.address || ""
+                    });
+                    router.push(`/app/loan/${lp.id}?${queryObj.toString()}`);
+                  }}>
+                    <TableCell className="font-medium whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <HandCoins className="h-4 w-4 text-muted-foreground" />
+                        {lp.name}
+                      </div>
+                    </TableCell>
+                    <TableCell className={`font-bold ${balance < 0 ? "text-red-600" : "text-emerald-600"}`}>
+                      Br {Math.abs(balance).toLocaleString()}
+                      <span className="ml-1 text-[10px] font-normal text-muted-foreground uppercase">
+                        ({balance < 0 ? "Owed" : "Lent"})
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+                        balance === 0 ? "bg-gray-50 text-gray-700 ring-gray-600/20" : 
+                        balance < 0 ? "bg-red-50 text-red-700 ring-red-600/10" : "bg-emerald-50 text-emerald-700 ring-emerald-600/10"
+                      }`}>
+                        {balance === 0 ? "Settled" : balance < 0 ? "Passive" : "Active"}
+                      </span>
+                    </TableCell>
+                    <TableCell onClick={e => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => {
+                            const queryObj = new URLSearchParams({
+                              name: lp.name || "",
+                              phone: lp.phone || "",
+                              balance: balance.toString(),
+                              address: lp.address || ""
+                            });
+                            router.push(`/app/loan/${lp.id}?${queryObj.toString()}`);
+                          }}>View Ledger</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
@@ -149,3 +199,4 @@ export default function LoanPage() {
     </div>
   );
 }
+

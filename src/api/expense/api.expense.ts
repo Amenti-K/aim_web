@@ -1,33 +1,20 @@
+import { IResponse } from "@/components/interface/common.interface";
+import {
+  IExpense,
+  IExpenseDetail,
+  INewExpense,
+} from "@/components/interface/expense/expense.interface";
 import { useMutate, useFetch, useInfiniteFetch } from "@/hooks/query.hook";
 import endpoints from "@/lib/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
 
-export interface IExpense {
-  id: string;
-  amount: number;
-  description?: string;
-  date: string;
-  accountId: string;
-  account?: any;
-  category?: string;
-  createdAt: string;
-}
-
-export interface INewExpense {
-  amount: number;
-  description?: string;
-  date: string;
-  accountId: string;
-  category?: string;
-}
-
-export interface IExpenseResponse {
-  data: IExpense[];
-}
-
 const onErrorNotification = (error: any) => {
-  toast.error(error.response?.data?.message || error.response?.data?.msg || "An error occurred");
+  toast.error(
+    error.response?.data?.message ||
+      error.response?.data?.msg ||
+      "An error occurred",
+  );
 };
 
 const onSuccessNotification = (data: any) => {
@@ -36,7 +23,7 @@ const onSuccessNotification = (data: any) => {
 
 export const useGetExpensesInfinite = (
   filterOptions?: Record<string, any>,
-  enabled?: boolean
+  enabled?: boolean,
 ) => {
   const { search, ...filter } = filterOptions ?? { search: undefined };
   const queryParams = {
@@ -44,7 +31,7 @@ export const useGetExpensesInfinite = (
     ...(search ? { search } : {}),
   };
 
-  return useInfiniteFetch<IExpenseResponse>(endpoints.EXPENSE, {
+  return useInfiniteFetch<IResponse<Array<IExpense>>>(endpoints.EXPENSE, {
     queryKey: queryKeys.expenses.list(queryParams),
     params: { ...queryParams, limit: 10 },
     enabled: enabled ?? true,
@@ -60,28 +47,32 @@ export const useCreateExpense = () => {
 };
 
 export const useFetchExpenseById = (id: string, enabled?: boolean) => {
-  return useFetch<{ data: IExpense }>(`${endpoints.EXPENSE}/${id}`, {
+  return useFetch<IResponse<IExpenseDetail>>(`${endpoints.EXPENSE}/${id}`, {
     queryKey: queryKeys.expenses.detail(id),
     enabled: enabled ?? !!id,
   });
 };
 
 export const useUpdateExpense = (id: string) => {
-  return useMutate<Partial<INewExpense>>(`${endpoints.EXPENSE}/${id}`, "patch", {
-    onError: onErrorNotification,
-    onSuccess: onSuccessNotification,
-    queryKey: queryKeys.expenses.root,
-  });
+  return useMutate<Partial<INewExpense>>(
+    `${endpoints.EXPENSE}/${id}`,
+    "patch",
+    {
+      onError: onErrorNotification,
+      onSuccess: onSuccessNotification,
+      queryKey: queryKeys.expenses.root,
+    },
+  );
 };
 
 export const useDeleteExpense = () => {
   return useMutate(
-    (data: { id: string }) => `${endpoints.EXPENSE}/${data.id}`,
+    (data: Partial<IExpense>) => `${endpoints.EXPENSE}/${data.id}`,
     "delete",
     {
       onError: onErrorNotification,
       onSuccess: () => toast.success("Expense deleted successfully!"),
       queryKey: queryKeys.expenses.root,
-    }
+    },
   );
 };

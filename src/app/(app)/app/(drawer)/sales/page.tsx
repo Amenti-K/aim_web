@@ -1,12 +1,18 @@
 "use client";
 
-import React from "react";
-import { useDeleteSale, useInfiniteSales } from "@/api/sale/api.sale";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  useDeleteSale,
+  useInfiniteSales,
+  useFetchDailySaleReport,
+} from "@/api/sale/api.sale";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreHorizontal, Receipt, Eye, Pencil, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { DailyReport } from "@/components/common/DailyReport";
 import {
   Table,
   TableBody,
@@ -15,35 +21,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { formatDate } from "@/lib/formatter";
-import { useRouter } from "next/navigation";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { formatCurrency, formatDate } from "@/lib/formatter";
+import { Calendar, User, Package, ChevronRight, Receipt } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { InfiniteScrollTrigger } from "@/components/common/InfiniteScrollTrigger";
 
 export default function SalesPage() {
   const router = useRouter();
-  const { canView, canCreate, canUpdate, canDelete } = usePermissions();
+  const { canView, canCreate } = usePermissions();
   const hasViewAccess = canView("SALES");
   const hasCreateAccess = canCreate("SALES");
-  const hasUpdateAccess = canUpdate("SALES");
-  const hasDeleteAccess = canDelete("SALES");
-  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
-  const [selectedSaleId, setSelectedSaleId] = React.useState<string | null>(null);
-  const deleteSale = useDeleteSale();
+
+  const [date, setDate] = useState<Date>(new Date());
+
+  const handleDateChange = (newDate: Date | undefined) => {
+    if (newDate) {
+      setDate(newDate);
+    }
+  };
 
   const {
     data,
@@ -55,158 +50,159 @@ export default function SalesPage() {
     isFetchingNextPage,
   } = useInfiniteSales(hasViewAccess);
 
-  const sales = React.useMemo(() => {
+  const {
+    data: dailyReportData,
+    isLoading: isLoadingDailyReport,
+    refetch: refetchDailyReport,
+  } = useFetchDailySaleReport(date, hasViewAccess);
+
+  const sales = useMemo(() => {
     return data?.pages?.flatMap((page) => (page as any).data) ?? [];
   }, [data]);
 
-  const handleDelete = () => {
-    if (!selectedSaleId) return;
-    deleteSale.mutate(
-      { id: selectedSaleId },
-      {
-        onSuccess: () => {
-          setIsDeleteOpen(false);
-          setSelectedSaleId(null);
-        },
-      },
-    );
-  };
+  useEffect(() => {
+    if (hasViewAccess) {
+      refetchDailyReport();
+    }
+  }, [date, hasViewAccess, refetchDailyReport]);
 
   if (!hasViewAccess) {
     return <AccessDeniedView moduleName="Sales" />;
   }
 
-  if (isLoading) return <LoadingView />;
+  if (isLoading && sales.length === 0) return <LoadingView />;
   if (isError) return <ErrorView refetch={refetch} />;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Sales</h1>
+    <div className="flex flex-col gap-6 pb-20 sm:pb-8">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 px-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            Sales
+          </h1>
           <p className="text-sm text-muted-foreground">
-            View and manage your sales transactions.
+            Manage your outgoing stocks and revenue.
           </p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto" onClick={() => router.push("/app/sales/new")}>
+          <Button
+            className="w-full shadow-lg shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 transition-all hover:shadow-xl sm:w-auto"
+            onClick={() => router.push("/app/sales/new")}
+          >
             <Plus className="mr-2 h-4 w-4" /> New Sale
           </Button>
         )}
       </div>
 
-      <div className="rounded-md border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Partner</TableHead>
-              <TableHead>Total Amount</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sales.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
-                  No sales found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              sales.map((sale: any) => (
-                <TableRow
-                  key={sale.id}
-                  className="cursor-pointer"
-                  onClick={() => router.push(`/app/sales/${sale.id}`)}
-                >
-                  <TableCell className="font-medium whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <Receipt className="h-4 w-4 text-muted-foreground" />
-                      {formatDate(sale.createdAt)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {sale.partner?.name || "Walk-in Customer"}
-                  </TableCell>
-                  <TableCell className="font-bold">
-                    ${Number(sale.total).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                      Completed
-                    </span>
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => router.push(`/app/sales/${sale.id}`)}>
-                          <Eye className="mr-2 h-4 w-4" /> View Details
-                        </DropdownMenuItem>
-                        {hasUpdateAccess && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/app/sales/${sale.id}/edit`)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                        )}
-                        {hasDeleteAccess && (
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => {
-                              setSelectedSaleId(sale.id);
-                              setIsDeleteOpen(true);
-                            }}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      {/* Daily Summary Section */}
+      <DailyReport
+        dailyReport={dailyReportData}
+        date={date}
+        setDate={handleDateChange}
+        isLoading={isLoadingDailyReport}
+        title="Sales Summary"
+        subtitle="Insights for your daily revenue"
+      />
 
-        {hasNextPage && (
-          <div className="flex justify-center p-4">
-            <Button
-              variant="outline"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-            >
-              {isFetchingNextPage ? "Loading more..." : "Load More"}
-            </Button>
+      {/* List Section */}
+      <div className="space-y-4 px-1">
+        {sales.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-card rounded-2xl border border-dashed text-emerald-600">
+            <div className="p-4 rounded-full bg-muted mb-4 text-muted-foreground">
+              <Plus className="h-8 w-8 opacity-20" />
+            </div>
+            <h3 className="text-lg font-medium text-foreground">
+              No sales found
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto mt-1">
+              Start recording sales to track your business performance.
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-2xl border bg-card shadow-sm overflow-hidden text-emerald-600">
+            <Table>
+              <TableHeader className="bg-muted/30">
+                <TableRow>
+                  <TableHead className="w-[300px]">Customer & ID</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Product Details
+                  </TableHead>
+                  <TableHead className="hidden sm:table-cell">Date</TableHead>
+                  <TableHead className="text-right">Revenue</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sales.map((sale: any) => {
+                  const itemCount = sale.saleItems?.length || 0;
+                  const mainItem =
+                    sale.saleItems?.[0]?.inventory?.name || "General Items";
+                  const soId = `SO-${sale.id.slice(-6).toUpperCase()}`;
+
+                  return (
+                    <TableRow
+                      key={sale.id}
+                      className="group cursor-pointer hover:bg-muted/30 transition-colors"
+                      onClick={() => router.push(`/app/sales/${sale.id}`)}
+                    >
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                            <Receipt className="h-5 w-5" />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-foreground truncate max-w-[180px]">
+                              {sale.partner?.name || "Walk-in Customer"}
+                            </span>
+                            <span className="text-xs text-muted-foreground tabular-nums">
+                              {soId}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell py-4">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm truncate max-w-[200px] text-muted-foreground">
+                            {mainItem}
+                          </span>
+                          {itemCount > 1 && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] py-0 h-5 border-emerald-200 bg-emerald-50 text-emerald-700"
+                            >
+                              +{itemCount - 1} more
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell py-4 text-muted-foreground">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4" />
+                          <span>{formatDate(sale.createdAt)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right py-4 font-bold text-emerald-600">
+                        {formatCurrency(sale.total || 0)}
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         )}
-      </div>
 
-      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete sale?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The selected sale record will be permanently deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={handleDelete}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <InfiniteScrollTrigger
+          hasNextPage={!!hasNextPage}
+          isLoading={isFetchingNextPage}
+          onIntersect={fetchNextPage}
+        />
+      </div>
     </div>
   );
 }

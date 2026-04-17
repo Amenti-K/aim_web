@@ -2,20 +2,24 @@ import { useMutate, useFetch, useInfiniteFetch } from "@/hooks/query.hook";
 import endpoints from "@/lib/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
+import {
+  IPartner,
+  IPartnerResponse,
+  IPartnerDetail,
+  INewPartner,
+} from "@/components/interface/partner/partner.interfacce";
+import { IResponse } from "@/components/interface/common.interface";
 
-export interface IPartner {
-  id: string;
-  name: string;
-  phone?: string;
-  address?: string;
-}
-
-export interface BulkPartner {
-  partners: Array<Partial<IPartner>>;
+interface BulkPartner {
+  partners: Array<INewPartner>;
 }
 
 const onErrorNotification = (error: any) => {
-  toast.error(error.response?.data?.message || error.response?.data?.msg || "An error occurred");
+  toast.error(
+    error.response?.data?.message ||
+      error.response?.data?.msg ||
+      "An error occurred",
+  );
 };
 
 const onSuccessNotification = (data: any) => {
@@ -23,7 +27,7 @@ const onSuccessNotification = (data: any) => {
 };
 
 export const useCreatePartner = () => {
-  return useMutate<any>(endpoints.PARTNER, "post", {
+  return useMutate<IPartner>(endpoints.PARTNER, "post", {
     onError: onErrorNotification,
     onSuccess: onSuccessNotification,
     queryKey: queryKeys.partners.root,
@@ -39,7 +43,7 @@ export const useCreateManyPartners = () => {
 };
 
 export const useUpdatePartner = (id: string) => {
-  return useMutate<any>(endpoints.PARTNER + "/" + id, "patch", {
+  return useMutate<IPartner>(endpoints.PARTNER + "/" + id, "patch", {
     onError: onErrorNotification,
     onSuccess: onSuccessNotification,
     queryKey: queryKeys.partners.root,
@@ -47,7 +51,7 @@ export const useUpdatePartner = (id: string) => {
 };
 
 export const useFetchPartnerById = (id: string, enabled?: boolean) => {
-  return useFetch<any>(endpoints.PARTNER + "/" + id, {
+  return useFetch<IResponse<IPartnerDetail>>(endpoints.PARTNER + "/" + id, {
     queryKey: queryKeys.partners.detail(id),
     enabled: enabled ?? !!id,
   });
@@ -60,20 +64,16 @@ export const useFetchPartnerSelector = () => {
 };
 
 export const useDeletePartner = () => {
-  return useMutate(
-    (data: any) => `${endpoints.PARTNER}/${data.id}`,
-    "delete",
-    {
-      onError: onErrorNotification,
-      onSuccess: () => toast.success("Partner Deleted successfully!"),
-      queryKey: queryKeys.partners.root,
-    }
-  );
+  return useMutate((data: any) => `${endpoints.PARTNER}/${data.id}`, "delete", {
+    onError: onErrorNotification,
+    onSuccess: () => toast.success("Partner Deleted successfully!"),
+    queryKey: queryKeys.partners.root,
+  });
 };
 
 export const useGetPartnersInfinite = (
   filterOptions?: Record<string, any>,
-  enabled?: boolean
+  enabled?: boolean,
 ) => {
   const { search, ...filter } = filterOptions ?? { search: undefined };
   const queryParams = {
@@ -81,10 +81,9 @@ export const useGetPartnersInfinite = (
     ...(search ? { search } : {}),
   };
 
-  return useInfiniteFetch<any>(endpoints.PARTNER, {
+  return useInfiniteFetch<IPartnerResponse>(endpoints.PARTNER, {
     queryKey: queryKeys.partners.list(queryParams),
     params: { ...queryParams, limit: 10 },
     enabled: enabled ?? true,
   });
 };
-

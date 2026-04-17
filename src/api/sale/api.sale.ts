@@ -2,69 +2,20 @@ import { useMutate, useFetch, useInfiniteFetch } from "@/hooks/query.hook";
 import endpoints from "@/lib/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
-
-export interface ISellItem {
-  id: string;
-  unitPrice: number;
-  quantity: number;
-  inventoryId: string;
-  warehouseId?: string;
-}
-
-export interface IPaymentItem {
-  amount: number;
-  description?: string;
-  accountId: string;
-}
-
-export interface ICashPayment {
-  amount: number;
-  description?: string;
-}
-
-export interface INewSale {
-  description?: string;
-  partnerId: string;
-  saleItems: ISellItem[];
-  salePayments: IPaymentItem[];
-  saleCashPayments?: ICashPayment;
-}
-
-export interface ISale {
-  id: string;
-  createdAt: string;
-  description?: string;
-  partnerId?: string;
-  partner?: any;
-  saleItems: {
-    inventory: { name: string };
-    unitPrice: number | string;
-    quantity: number;
-  }[];
-  total: number;
-}
-
-export interface ISaleResponse {
-  data: ISale[];
-}
-
-export interface ISaleDailyResponse {
-  totalPaidByBank: number;
-  totalPaidByCash: number;
-  totalLoan: number;
-}
-
-export interface ISaleView extends ISale {
-  partner?: any;
-  saleItems: any[];
-  salePayments: any[];
-  saleCashPayment?: ICashPayment;
-  loan?: any;
-  lastAuditLog: any;
-}
+import {
+  ISaleResponse,
+  ISaleDailyResponse,
+  INewSale,
+  ISaleView,
+  ISale,
+} from "@/components/interface/sales/interface.sale";
 
 const onErrorNotification = (error: any) => {
-  toast.error(error.response?.data?.message || error.response?.data?.msg || "An error occurred");
+  toast.error(
+    error.response?.data?.message ||
+      error.response?.data?.msg ||
+      "An error occurred",
+  );
 };
 
 const onSuccessNotification = (data: any) => {
@@ -75,7 +26,7 @@ export const useFetchSales = (
   page: number,
   size: number,
   filterOptions?: Record<string, any>,
-  enabled?: boolean
+  enabled?: boolean,
 ) => {
   const { search, ...filter } = filterOptions ?? { search: undefined };
   const queryParams = {
@@ -94,7 +45,7 @@ export const useFetchSales = (
 
 export const useInfiniteSales = (
   enabled: boolean,
-  filters: Record<string, any> = {}
+  filters: Record<string, any> = {},
 ) => {
   return useInfiniteFetch<ISaleResponse>(endpoints.SALE, {
     queryKey: queryKeys.sales.list(filters),
@@ -111,12 +62,10 @@ export const useCreateSale = () => {
   });
 };
 
-export const useFetchDailySaleReport = (
-  date: Date,
-  enabled?: boolean
-) => {
+export const useFetchDailySaleReport = (date: Date, enabled?: boolean) => {
+  const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   const queryParams = {
-    date: date?.toISOString(),
+    date: formattedDate,
   };
   return useFetch<ISaleDailyResponse>(endpoints.SALE + `/daily-report`, {
     queryKey: queryKeys.sales.list(queryParams),
@@ -148,6 +97,6 @@ export const useDeleteSale = () => {
       onError: onErrorNotification,
       onSuccess: () => toast.success("Sale Deleted successfully!"),
       queryKey: queryKeys.sales.root,
-    }
+    },
   );
 };

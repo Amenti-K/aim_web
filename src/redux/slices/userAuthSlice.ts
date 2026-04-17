@@ -33,21 +33,28 @@ interface UserAuthState {
   error: string | null;
 }
 
-// ─── Cookie persistence ───────────────────────────────────────────────────────
-
+// ─── Cookie Sync ──────────────────────────────────────────────────────────────
 const COOKIE_KEY = "user_auth";
 const COOKIE_OPTIONS: Cookies.CookieAttributes = {
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict",
-  expires: 7, // 7 days — good for PWA offline token retention
+  expires: 7,
   path: "/",
 };
 
-function saveToCookie(state: Omit<UserAuthState, "loading" | "error">) {
-  Cookies.set(COOKIE_KEY, JSON.stringify(state), COOKIE_OPTIONS);
-}
-
 function getInitialState(): UserAuthState {
+  // Sync reading from cookies for immediate availability on reload
+  if (typeof window === "undefined") {
+    return {
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+      company: null,
+      loading: false,
+      error: null,
+    };
+  }
+
   try {
     const data = Cookies.get(COOKIE_KEY);
     if (data) {
@@ -61,8 +68,8 @@ function getInitialState(): UserAuthState {
         error: null,
       };
     }
-  } catch {
-    // ignore corrupted cookie
+  } catch (err) {
+    console.error("Error parsing user_auth cookie:", err);
   }
 
   return {
@@ -75,11 +82,25 @@ function getInitialState(): UserAuthState {
   };
 }
 
+const saveToCookie = (state: UserAuthState) => {
+  try {
+    const { accessToken, refreshToken, user, company } = state;
+    Cookies.set(
+      COOKIE_KEY,
+      JSON.stringify({ accessToken, refreshToken, user, company }),
+      COOKIE_OPTIONS,
+    );
+  } catch (err) {
+    console.error("Error saving to user_auth cookie:", err);
+  }
+};
+
 // ─── Slice ─────────────────────────────────────────────────────────────────────
+const initialState: UserAuthState = getInitialState();
 
 const userAuthSlice = createSlice({
   name: "userAuth",
-  initialState: getInitialState(),
+  initialState,
   reducers: {
     loginUser(
       state,
@@ -95,78 +116,30 @@ const userAuthSlice = createSlice({
       state.user = action.payload.user;
       state.company = action.payload.company;
       state.error = null;
-
-      saveToCookie({
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        user: state.user,
-        company: state.company,
-      });
+      saveToCookie(state);
     },
 
     updateUserToken(state, action: PayloadAction<string>) {
       state.accessToken = action.payload;
-
-      const cookie = Cookies.get(COOKIE_KEY);
-      if (!cookie) return;
-
-      const parsed = JSON.parse(cookie);
-      Cookies.set(
-        COOKIE_KEY,
-        JSON.stringify({ ...parsed, accessToken: action.payload }),
-        COOKIE_OPTIONS
-      );
+      saveToCookie(state);
     },
 
     setCompany(state, action: PayloadAction<CompanyInfo>) {
       state.company = action.payload;
-
-      const cookie = Cookies.get(COOKIE_KEY);
-      if (!cookie) return;
-
-      const parsed = JSON.parse(cookie);
-      Cookies.set(
-        COOKIE_KEY,
-        JSON.stringify({ ...parsed, company: action.payload }),
-        COOKIE_OPTIONS
-      );
+      saveToCookie(state);
     },
 
     setSubscription(state, action: PayloadAction<ISubscription | null>) {
       if (state.company) {
         state.company.subscription = action.payload;
-
-        const cookie = Cookies.get(COOKIE_KEY);
-        if (!cookie) return;
-
-        const parsed = JSON.parse(cookie);
-        Cookies.set(
-          COOKIE_KEY,
-          JSON.stringify({
-            ...parsed,
-            company: { ...parsed.company, subscription: action.payload },
-          }),
-          COOKIE_OPTIONS
-        );
+        saveToCookie(state);
       }
     },
 
     setCompanyStep(state, action: PayloadAction<number>) {
       if (state.company) {
         state.company.setupStep = action.payload;
-
-        const cookie = Cookies.get(COOKIE_KEY);
-        if (!cookie) return;
-
-        const parsed = JSON.parse(cookie);
-        Cookies.set(
-          COOKIE_KEY,
-          JSON.stringify({
-            ...parsed,
-            company: { ...parsed.company, setupStep: action.payload }
-          }),
-          COOKIE_OPTIONS
-        );
+        saveToCookie(state);
       }
     },
 
@@ -176,7 +149,6 @@ const userAuthSlice = createSlice({
       state.user = null;
       state.company = null;
       state.error = null;
-
       Cookies.remove(COOKIE_KEY);
     },
   },

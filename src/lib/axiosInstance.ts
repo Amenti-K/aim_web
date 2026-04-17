@@ -1,5 +1,5 @@
 import axios from "axios";
-import { logout, updateAccessToken } from "@/redux/slices/authSlice";
+import { logoutUser, updateUserToken } from "@/redux/slices/userAuthSlice";
 import store from "@/redux/store";
 
 export const AxiosInstance = axios.create({
@@ -23,12 +23,6 @@ AxiosInstance.interceptors.request.use(
     if (company?.id && !config.url?.includes("/auth/")) {
       config.headers["x-company-id"] = company.id;
     }
-    // console.log(
-    //   "➡️ [REQUEST]",
-    //   config.method?.toUpperCase(),
-    //   config.url,
-    //   config.headers,
-    // );
     return config;
   },
   (error) => Promise.reject(error),
@@ -47,31 +41,11 @@ AxiosInstance.interceptors.request.use((config) => {
 
 AxiosInstance.interceptors.response.use(
   (res) => {
-    // console.log("✅ [RESPONSE]", res.data);
     return res;
   },
   async (error) => {
-    // console.log(
-    //   "❌ [RESPONSE ERROR]",
-    //   error.response?.status,
-    //   error.response?.data,
-    // );
-
-    // if (error.response?.status === 503) {
-    //   console.log("Maintenance mode enabled");
-    //   store.dispatch(setMaintenanceMode(true));
-    //   store.dispatch(logout());
-    //   return Promise.reject(error);
-    // }
-
     const originalRequest = error.config;
     const state = store.getState();
-
-    // if (error.response?.status === 403) {
-    //   console.log("Refresh failed, forcing logout");
-    //   store.dispatch(logout());
-    //   return Promise.reject(error);
-    // }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -80,23 +54,21 @@ AxiosInstance.interceptors.response.use(
       if (refreshToken) {
         try {
           const res = await axios.post(
-            `${process.env.EXPO_PUBLIC_API_URL}/auth/refresh`,
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
             { refreshToken },
             { headers: { "x-company-id": company?.id } },
           );
 
           const newAccessToken = res.data.accessToken;
-          store.dispatch(updateAccessToken(newAccessToken));
+          store.dispatch(updateUserToken(newAccessToken));
 
           originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
           return AxiosInstance(originalRequest);
         } catch (refreshError) {
-          // console.log("Refresh failed, forcing logout");
-          store.dispatch(logout());
+          store.dispatch(logoutUser());
         }
       } else {
-        // console.log("No refresh token, forcing logout");
-        store.dispatch(logout());
+        store.dispatch(logoutUser());
       }
     }
 

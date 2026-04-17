@@ -1,30 +1,15 @@
+import { INewAdjustment } from "@/components/interface/adjustment/adjustment.interface";
 import { useMutate, useFetch, useInfiniteFetch } from "@/hooks/query.hook";
 import endpoints from "@/lib/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
 
-export interface IAdjustment {
-  id: string;
-  reason: string;
-  type: "INCREASE" | "DECREASE";
-  quantity: number;
-  inventoryId: string;
-  warehouseId: string;
-  inventory?: any;
-  warehouse?: any;
-  createdAt: string;
-}
-
-export interface INewAdjustment {
-  reason: string;
-  type: "INCREASE" | "DECREASE";
-  quantity: number;
-  inventoryId: string;
-  warehouseId: string;
-}
-
 const onErrorNotification = (error: any) => {
-  toast.error(error.response?.data?.message || error.response?.data?.msg || "An error occurred");
+  toast.error(
+    error.response?.data?.message ||
+      error.response?.data?.msg ||
+      "An error occurred",
+  );
 };
 
 const onSuccessNotification = (data: any) => {
@@ -33,7 +18,7 @@ const onSuccessNotification = (data: any) => {
 
 export const useGetAdjustmentsInfinite = (
   filterOptions?: Record<string, any>,
-  enabled?: boolean
+  enabled?: boolean,
 ) => {
   const { search, ...filter } = filterOptions ?? { search: undefined };
   const queryParams = {
@@ -64,11 +49,15 @@ export const useFetchAdjustmentById = (id: string, enabled?: boolean) => {
 };
 
 export const useUpdateAdjustment = (id: string) => {
-  return useMutate<Partial<INewAdjustment>>(`${endpoints.ADJUSTMENT}/${id}`, "patch", {
-    onError: onErrorNotification,
-    onSuccess: onSuccessNotification,
-    queryKey: queryKeys.adjustments.root,
-  });
+  return useMutate<Partial<INewAdjustment>>(
+    `${endpoints.ADJUSTMENT}/${id}`,
+    "patch",
+    {
+      onError: onErrorNotification,
+      onSuccess: onSuccessNotification,
+      queryKey: queryKeys.adjustments.root,
+    },
+  );
 };
 
 export const useDeleteAdjustment = () => {
@@ -79,6 +68,6 @@ export const useDeleteAdjustment = () => {
       onError: onErrorNotification,
       onSuccess: () => toast.success("Adjustment deleted successfully!"),
       queryKey: queryKeys.adjustments.root,
-    }
+    },
   );
 };

@@ -25,14 +25,12 @@ const endpoints = {
   LOANPARTNERTRANX: "/loan/partner",
   LOANPARTNERS: "/loan/partners",
 
-  ANALYTICS: "/anaytics/analytics",
-  ADMINANALYTICS: "/anaytics/admin",
-  PIECHART: "/anaytics/piechart",
-  PROFIT: "/anaytics/profit",
+  ANALYTICS: "/anaytics",
+  ADMINANALYTICS: "/admin/analytics",
 
   MAIL: "/mail",
   MAILCONTACT: "/mail/contact",
-  AUDITLOG: "/audit",
+  AUDITLOG: "/audit-log",
 };
 
 

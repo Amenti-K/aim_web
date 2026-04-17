@@ -1,15 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   useDeletePurchase,
   useInfinitePurchases,
+  useFetchDailyPurchaseReport,
 } from "@/api/purchase/api.purchase";
 import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreHorizontal, ShoppingCart, Eye, Pencil, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { DailyReport } from "@/components/common/DailyReport";
 import {
   Table,
   TableBody,
@@ -18,35 +21,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatCurrency, formatDate } from "@/lib/formatter";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { formatDate } from "@/lib/formatter";
-import { useRouter } from "next/navigation";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Calendar,
+  User,
+  Package,
+  ChevronRight,
+  ShoppingCart,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { InfiniteScrollTrigger } from "@/components/common/InfiniteScrollTrigger";
 
 export default function PurchasePage() {
   const router = useRouter();
-  const { canView, canCreate, canUpdate, canDelete } = usePermissions();
+  const { canView, canCreate } = usePermissions();
   const hasViewAccess = canView("PURCHASE");
   const hasCreateAccess = canCreate("PURCHASE");
-  const hasUpdateAccess = canUpdate("PURCHASE");
-  const hasDeleteAccess = canDelete("PURCHASE");
-  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
-  const [selectedPurchaseId, setSelectedPurchaseId] = React.useState<string | null>(null);
-  const deletePurchase = useDeletePurchase();
+
+  const [date, setDate] = useState<Date>(new Date());
+
+  const handleDateChange = (newDate: Date | undefined) => {
+    if (newDate) {
+      setDate(newDate);
+    }
+  };
 
   const {
     data,
@@ -58,158 +56,162 @@ export default function PurchasePage() {
     isFetchingNextPage,
   } = useInfinitePurchases(hasViewAccess);
 
-  const purchases = React.useMemo(() => {
+  const {
+    data: dailyReportData,
+    isLoading: isLoadingDailyReport,
+    refetch: refetchDailyReport,
+  } = useFetchDailyPurchaseReport(date, hasViewAccess);
+
+  const purchases = useMemo(() => {
     return data?.pages?.flatMap((page) => (page as any).data) ?? [];
   }, [data]);
 
-  const handleDelete = () => {
-    if (!selectedPurchaseId) return;
-    deletePurchase.mutate(
-      { id: selectedPurchaseId },
-      {
-        onSuccess: () => {
-          setIsDeleteOpen(false);
-          setSelectedPurchaseId(null);
-        },
-      },
-    );
-  };
+  useEffect(() => {
+    if (hasViewAccess) {
+      refetchDailyReport();
+    }
+  }, [date, hasViewAccess, refetchDailyReport]);
 
   if (!hasViewAccess) {
     return <AccessDeniedView moduleName="Purchase" />;
   }
 
-  if (isLoading) return <LoadingView />;
+  if (isLoading && purchases.length === 0) return <LoadingView />;
   if (isError) return <ErrorView refetch={refetch} />;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Purchases</h1>
+    <div className="flex flex-col gap-6 pb-20 sm:pb-8">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 px-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            Purchases
+          </h1>
           <p className="text-sm text-muted-foreground">
-            View and manage your inventory stock purchases from suppliers.
+            Monitor and manage your supply chain transactions.
           </p>
         </div>
         {hasCreateAccess && (
-          <Button className="w-full sm:w-auto" onClick={() => router.push("/app/purchase/new")}>
+          <Button
+            className="w-full shadow-lg shadow-primary/20 transition-all hover:shadow-xl sm:w-auto"
+            onClick={() => router.push("/app/purchase/new")}
+          >
             <Plus className="mr-2 h-4 w-4" /> New Purchase
           </Button>
         )}
       </div>
 
-      <div className="rounded-md border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Supplier</TableHead>
-              <TableHead>Total Cost</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {purchases.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
-                  No purchases found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              purchases.map((purchase: any) => (
-                <TableRow
-                  key={purchase.id}
-                  className="cursor-pointer"
-                  onClick={() => router.push(`/app/purchase/${purchase.id}`)}
-                >
-                  <TableCell className="font-medium whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                      {formatDate(purchase.createdAt)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {purchase.partner?.name || "General Supplier"}
-                  </TableCell>
-                  <TableCell className="font-bold">
-                    ${Number(purchase.total).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                      Received
-                    </span>
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => router.push(`/app/purchase/${purchase.id}`)}>
-                          <Eye className="mr-2 h-4 w-4" /> View Details
-                        </DropdownMenuItem>
-                        {hasUpdateAccess && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/app/purchase/${purchase.id}/edit`)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                        )}
-                        {hasDeleteAccess && (
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => {
-                              setSelectedPurchaseId(purchase.id);
-                              setIsDeleteOpen(true);
-                            }}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      {/* Daily Summary Section */}
+      <DailyReport
+        dailyReport={dailyReportData}
+        date={date}
+        setDate={handleDateChange}
+        isLoading={isLoadingDailyReport}
+        title="Purchase Summary"
+        subtitle="Insights for your inventory intake"
+      />
 
-        {hasNextPage && (
-          <div className="flex justify-center p-4">
-            <Button
-              variant="outline"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-            >
-              {isFetchingNextPage ? "Loading more..." : "Load More"}
-            </Button>
+      {/* List Section */}
+      <div className="space-y-4 px-1">
+        {purchases.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-card rounded-2xl border border-dashed text-primary">
+            <div className="p-4 rounded-full bg-muted mb-4 text-muted-foreground">
+              <Plus className="h-8 w-8 opacity-20" />
+            </div>
+            <h3 className="text-lg font-medium text-foreground">
+              No purchases found
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto mt-1">
+              Start adding purchases to keep track of your incoming inventory.
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/30">
+                <TableRow>
+                  <TableHead className="w-[300px]">Supplier & ID</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Product Details
+                  </TableHead>
+                  <TableHead className="hidden sm:table-cell">Date</TableHead>
+                  <TableHead className="text-right">Total Amount</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {purchases.map((purchase: any) => {
+                  const itemCount = purchase.purchaseItems?.length || 0;
+                  const mainItem =
+                    purchase.purchaseItems?.[0]?.inventory?.name ||
+                    "General Items";
+                  const poId = `PO-${purchase.id.slice(-6).toUpperCase()}`;
+
+                  return (
+                    <TableRow
+                      key={purchase.id}
+                      className="group cursor-pointer hover:bg-muted/30 transition-colors"
+                      onClick={() =>
+                        router.push(`/app/purchase/${purchase.id}`)
+                      }
+                    >
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <User className="h-5 w-5" />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-foreground truncate max-w-[180px]">
+                              {purchase.partner?.name || "General Supplier"}
+                            </span>
+                            <span className="text-xs text-muted-foreground tabular-nums">
+                              {poId}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell py-4">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm truncate max-w-[200px]">
+                            {mainItem}
+                          </span>
+                          {itemCount > 1 && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] py-0 h-5 border-primary/20 bg-primary/5"
+                            >
+                              +{itemCount - 1} more
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell py-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>{formatDate(purchase.createdAt)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right py-4 font-bold text-foreground">
+                        {formatCurrency(purchase.total || 0)}
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         )}
-      </div>
 
-      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete purchase?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The selected purchase record will be permanently deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={handleDelete}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <InfiniteScrollTrigger
+          hasNextPage={!!hasNextPage}
+          isLoading={isFetchingNextPage}
+          onIntersect={fetchNextPage}
+        />
+      </div>
     </div>
   );
 }

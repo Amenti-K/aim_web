@@ -2,60 +2,13 @@ import { useMutate, useFetch, useInfiniteFetch } from "@/hooks/query.hook";
 import endpoints from "@/lib/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
-
-export interface IPurchaseItem {
-  id: string;
-  unitPrice: number;
-  quantity: number;
-  inventoryId: string;
-  warehouseId?: string;
-}
-
-export interface IPurchasePayment {
-  amount: number;
-  description?: string;
-  accountId: string;
-}
-
-export interface INewPurchase {
-  description?: string;
-  partnerId: string;
-  purchaseItems: IPurchaseItem[];
-  purchasePayments: IPurchasePayment[];
-}
-
-export interface IPurchase {
-  id: string;
-  createdAt: string;
-  description?: string;
-  partnerId?: string;
-  partner?: any;
-  purchaseItems: {
-    inventory: { name: string };
-    unitPrice: number | string;
-    quantity: number;
-  }[];
-  total: number;
-}
-
-export interface IPurchaseResponse {
-  data: IPurchase[];
-}
-
-export interface IPurchaseDailyResponse {
-  totalPaidByBank: number;
-  totalPaidByCash: number;
-  totalLoan: number;
-}
-
-export interface IPurchaseView extends IPurchase {
-  partner?: any;
-  purchaseItems: any[];
-  purchasePayments: any[];
-  purchaseCashPayment?: any;
-  loan?: any;
-  lastAuditLog: any;
-}
+import { 
+  IPurchaseResponse, 
+  IPurchaseDailyResponse, 
+  INewPurchase, 
+  IPurchaseView,
+  IPurchase
+} from "@/components/interface/purchase/purchase.interface";
 
 const onErrorNotification = (error: any) => {
   toast.error(error.response?.data?.message || error.response?.data?.msg || "An error occurred");
@@ -109,8 +62,9 @@ export const useFetchDailyPurchaseReport = (
   date: Date,
   enabled?: boolean
 ) => {
+  const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   const queryParams = {
-    date: date?.toISOString(),
+    date: formattedDate,
   };
   return useFetch<IPurchaseDailyResponse>(endpoints.PURCHASE + `/daily-report`, {
     queryKey: queryKeys.purchases.list(queryParams),

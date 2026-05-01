@@ -2,15 +2,36 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Pencil, Trash2, ReceiptText, Calendar, FileText, CreditCard, Banknote } from "lucide-react";
-import { useDeleteExpense, useFetchExpenseById } from "@/api/expense/api.expense";
+import {
+  ArrowLeft,
+  Pencil,
+  Trash2,
+  ReceiptText,
+  Calendar,
+  FileText,
+  CreditCard,
+  Banknote,
+} from "lucide-react";
+import {
+  useDeleteExpense,
+  useFetchExpenseById,
+} from "@/api/expense/api.expense";
 import { ErrorView, LoadingView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/formatter";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 
 export default function ExpenseDetailPage() {
@@ -19,25 +40,31 @@ export default function ExpenseDetailPage() {
   const expenseId = id as string;
   const { canView, canUpdate, canDelete } = usePermissions();
   const [openDelete, setOpenDelete] = React.useState(false);
-  const { data, isLoading, isError, refetch } = useFetchExpenseById(expenseId, canView("EXPENSE"));
+  const { data, isLoading, isError, refetch } = useFetchExpenseById(
+    expenseId,
+    canView("EXPENSE"),
+  );
   const deleteExpense = useDeleteExpense();
 
   if (!canView("EXPENSE")) return <AccessDeniedView moduleName="Expenses" />;
   if (isLoading) return <LoadingView />;
   if (isError || !data?.data) return <ErrorView refetch={refetch} />;
-  
+
   const expense: any = data.data;
   const bankPayments = expense.expensePayments ?? [];
   const cash = Number(expense.expenseCashPayment?.amount || 0);
-  const bankTotal = bankPayments.reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
+  const bankTotal = bankPayments.reduce(
+    (sum: number, item: any) => sum + Number(item.amount || 0),
+    0,
+  );
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       {/* Header Actions */}
       <div className="flex items-center justify-between sticky top-0 z-10 bg-background/80 backdrop-blur-md py-4 px-1">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => router.back()}
           className="hover:bg-accent/50 rounded-full"
         >
@@ -45,8 +72,8 @@ export default function ExpenseDetailPage() {
         </Button>
         <div className="flex gap-2">
           {canUpdate("EXPENSE") && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => router.push(`/app/expense/${expenseId}/edit`)}
               className="rounded-full shadow-sm hover:shadow-md transition-all"
@@ -55,8 +82,8 @@ export default function ExpenseDetailPage() {
             </Button>
           )}
           {canDelete("EXPENSE") && (
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               size="sm"
               onClick={() => setOpenDelete(true)}
               className="rounded-full shadow-sm hover:shadow-md transition-all"
@@ -74,13 +101,15 @@ export default function ExpenseDetailPage() {
           <div className="inline-flex p-3 rounded-2xl bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 mb-2">
             <ReceiptText className="h-8 w-8 text-destructive" />
           </div>
-          <h1 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Expense</h1>
+          <h1 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Total Expense
+          </h1>
           <p className="text-5xl font-black text-foreground tracking-tighter">
             {formatCurrency(expense.amount)}
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-4">
             <Calendar className="h-4 w-4" />
-            <span>{formatDate(expense.date)}</span>
+            <span>{formatDate(expense.createdAt)}</span>
           </div>
         </div>
 
@@ -112,11 +141,15 @@ export default function ExpenseDetailPage() {
                 <div className="grid grid-cols-1 gap-4 text-sm">
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span>Created Date</span>
-                    <span className="text-foreground font-medium">{formatDate(expense.createdAt)}</span>
+                    <span className="text-foreground font-medium">
+                      {formatDate(expense.createdAt)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span>Reference ID</span>
-                    <span className="text-foreground font-mono bg-muted px-2 py-0.5 rounded text-xs">EXE-{expenseId.split('-')[0].toUpperCase()}</span>
+                    <span className="text-foreground font-mono bg-muted px-2 py-0.5 rounded text-xs">
+                      EXE-{expenseId.split("-")[0].toUpperCase()}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -132,7 +165,7 @@ export default function ExpenseDetailPage() {
                 </div>
                 <h3 className="font-bold">Payment Breakdown</h3>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
                   <div className="flex items-center gap-3">
@@ -144,14 +177,25 @@ export default function ExpenseDetailPage() {
 
                 {bankPayments.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold text-muted-foreground px-1 uppercase tracking-wider">Bank Accounts</p>
+                    <p className="text-xs font-semibold text-muted-foreground px-1 uppercase tracking-wider">
+                      Bank Accounts
+                    </p>
                     {bankPayments.map((item: any) => (
-                      <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 scale-[0.99] hover:scale-100 transition-transform">
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 scale-[0.99] hover:scale-100 transition-transform"
+                      >
                         <div className="flex flex-col">
-                          <span className="text-sm font-bold text-foreground">{item.account?.name || "Bank Account"}</span>
-                          <span className="text-[10px] text-muted-foreground uppercase">{item.account?.bank || "Standard"}</span>
+                          <span className="text-sm font-bold text-foreground">
+                            {item.account?.name || "Bank Account"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground uppercase">
+                            {item.account?.bank || "Standard"}
+                          </span>
                         </div>
-                        <span className="font-bold text-orange-600">{formatCurrency(item.amount)}</span>
+                        <span className="font-bold text-orange-600">
+                          {formatCurrency(item.amount)}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -161,8 +205,12 @@ export default function ExpenseDetailPage() {
               <div className="mt-auto pt-4">
                 <div className="p-4 rounded-2xl bg-foreground text-background dark:bg-muted dark:text-foreground">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium opacity-80">Settled Amount</span>
-                    <span className="text-xl font-black">{formatCurrency(Number(expense.amount))}</span>
+                    <span className="text-sm font-medium opacity-80">
+                      Settled Amount
+                    </span>
+                    <span className="text-xl font-black">
+                      {formatCurrency(Number(expense.amount))}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -175,16 +223,26 @@ export default function ExpenseDetailPage() {
       <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
         <AlertDialogContent className="rounded-2xl border-none shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold">Delete this record?</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl font-bold">
+              Delete this record?
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              This action permanent and cannot be undone. Are you sure you want to delete this expense history?
+              This action permanent and cannot be undone. Are you sure you want
+              to delete this expense history?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-0 mt-4">
-            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full" 
-              onClick={() => deleteExpense.mutate({ id: expenseId }, { onSuccess: () => router.push("/app/expense") })}
+            <AlertDialogCancel className="rounded-full">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full"
+              onClick={() =>
+                deleteExpense.mutate(
+                  { id: expenseId },
+                  { onSuccess: () => router.push("/app/expense") },
+                )
+              }
             >
               Confirm Delete
             </AlertDialogAction>

@@ -7,7 +7,14 @@ import { LoadingView, ErrorView } from "@/components/common/StateView";
 import { AccessDeniedView } from "@/components/guards/AccessDeniedView";
 import { usePermissions } from "@/hooks/permission.hook";
 import { Button } from "@/components/ui/button";
-import { Plus, ReceiptText, ChevronRight, Calendar, Tag, Wallet } from "lucide-react";
+import {
+  Plus,
+  ReceiptText,
+  ChevronRight,
+  Calendar,
+  Tag,
+  Wallet,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -51,14 +58,16 @@ export default function ExpensePage() {
     <div className="space-y-6 pb-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-1">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground/90">Expenses</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground/90">
+            Expenses
+          </h1>
           <p className="text-muted-foreground">
             Track and manage your company operating costs.
           </p>
         </div>
         {hasCreateAccess && (
-          <Button 
-            className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300" 
+          <Button
+            className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300"
             onClick={() => router.push("/app/expense/new")}
           >
             <Plus className="mr-2 h-5 w-5" /> New Expense
@@ -73,21 +82,26 @@ export default function ExpensePage() {
             <TableRow className="hover:bg-transparent border-none">
               <TableHead className="font-semibold px-6 py-4">Date</TableHead>
               <TableHead className="font-semibold">Description</TableHead>
-              <TableHead className="font-semibold text-right px-6">Amount</TableHead>
+              <TableHead className="font-semibold text-right px-6">
+                Amount
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {expenses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="h-48 text-center text-muted-foreground italic">
+                <TableCell
+                  colSpan={3}
+                  className="h-48 text-center text-muted-foreground italic"
+                >
                   No expenses recorded yet.
                 </TableCell>
               </TableRow>
             ) : (
               expenses.map((exp: any) => (
-                <TableRow 
-                  key={exp.id} 
-                  className="cursor-pointer transition-colors hover:bg-muted/30 group border-muted/20" 
+                <TableRow
+                  key={exp.id}
+                  className="cursor-pointer transition-colors hover:bg-muted/30 group border-muted/20"
                   onClick={() => router.push(`/app/expense/${exp.id}`)}
                 >
                   <TableCell className="px-6 py-4">
@@ -95,16 +109,15 @@ export default function ExpensePage() {
                       <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400">
                         <ReceiptText className="h-4 w-4" />
                       </div>
-                      <span className="font-medium text-foreground/80">{formatDate(exp.date)}</span>
+                      <span className="font-medium text-foreground/80">
+                        {formatDate(exp.createdAt)}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-0.5 max-w-[400px]">
                       <span className="text-sm font-medium leading-none text-foreground/90 truncate">
                         {exp.description || "Uncategorized Expense"}
-                      </span>
-                      <span className="text-xs text-muted-foreground truncate italic">
-                        Recorded on {formatDate(exp.createdAt)}
                       </span>
                     </div>
                   </TableCell>
@@ -131,8 +144,8 @@ export default function ExpensePage() {
           </div>
         ) : (
           expenses.map((exp: any) => (
-            <Card 
-              key={exp.id} 
+            <Card
+              key={exp.id}
               className="overflow-hidden border-none shadow-md active:scale-[0.98] transition-all bg-card/80 backdrop-blur-sm"
               onClick={() => router.push(`/app/expense/${exp.id}`)}
             >
@@ -153,7 +166,7 @@ export default function ExpensePage() {
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {formatDate(exp.date)}
+                        {formatDate(exp.createdAt)}
                       </div>
                     </div>
                   </div>
@@ -178,7 +191,9 @@ export default function ExpensePage() {
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 Loading...
               </div>
-            ) : "View More Expenses"}
+            ) : (
+              "View More Expenses"
+            )}
           </Button>
         </div>
       )}

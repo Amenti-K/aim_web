@@ -184,21 +184,19 @@ function SummaryItem({
       )}
     >
       <div className="flex items-center gap-3">
-        <div className={cn("rounded-lg p-2 bg-white shadow-sm", color)}>
+        <div className={cn("rounded-lg p-2 bg-muted-black shadow-sm", color)}>
           {icon}
         </div>
-        <span className="text-sm font-medium text-muted-foreground">
-          {label}
-        </span>
+        <span className="text-sm font-medium text-black">{label}</span>
       </div>
       <div className="flex flex-col">
         {isLoading ? (
-          <Skeleton className="h-8 w-24 bg-background/50" />
+          <Skeleton className="h-8 w-24 bg-black" />
         ) : (
           <span
             className={cn(
               "text-2xl font-bold tracking-tight",
-              isNegative && value > 0 ? "text-rose-600" : "text-foreground",
+              isNegative && value > 0 ? "text-rose-600" : "text-black",
             )}
           >
             {formatCurrency(value)}

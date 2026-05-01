@@ -1,10 +1,26 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "motion/react";
-import { Shield, Lock, Eye, BookOpen, Clock } from "lucide-react";
+import { Shield, Lock, Eye, BookOpen, Clock, UserMinus } from "lucide-react";
 
 export default function PrivacyPage() {
   const lastUpdated = "March 30, 2026";
+
+  useEffect(() => {
+    // Check if the URL has a hash, e.g., #account-deletion
+    if (typeof window !== "undefined" && window.location.hash) {
+      const id = window.location.hash.replace("#", "");
+
+      // Delay slightly to let Framer Motion animations settle
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 500);
+    }
+  }, []);
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-12 lg:py-24 space-y-16">
@@ -135,6 +151,57 @@ export default function PrivacyPage() {
           </p>
         </div>
 
+        <div className="space-y-6">
+          <h2
+            id="account-deletion"
+            className="text-2xl font-bold flex items-center gap-3 scroll-mt-24"
+          >
+            <UserMinus className="text-primary" />
+            5. Account Deletion
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            We provide a clear and permanent way for you to delete your account
+            directly within the AIM Stock app.
+          </p>
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">
+              How to Delete Your Account
+            </h3>
+            <ol className="list-decimal list-inside text-muted-foreground space-y-2">
+              <li>
+                Open the <strong>Drawer</strong> menu in the AIM Stock app.
+              </li>
+              <li>
+                Navigate to <strong>Settings</strong> &gt;{" "}
+                <strong>Company Information</strong>.
+              </li>
+              <li>
+                Scroll down to the bottom of the page and tap{" "}
+                <strong>Delete My Account</strong>.
+              </li>
+              <li>Enter your password to securely confirm the deletion.</li>
+            </ol>
+
+            <h3 className="text-xl font-semibold pt-2">Data Deletion Policy</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Account deletion is a permanent action. Upon confirmation, all
+              your account data, inventory records, and transaction history will
+              be permanently deleted from our systems within 30 days. This
+              action cannot be undone.
+            </p>
+
+            <h3 className="text-xl font-semibold pt-2">
+              Alternative Deletion Method
+            </h3>
+            <p className="text-muted-foreground leading-relaxed">
+              If you cannot access the AIM Stock app, you can request account
+              deletion by emailing our support team at{" "}
+              <strong>support@aimstock.app</strong> with your registered phone
+              number.
+            </p>
+          </div>
+        </div>
+
         <div className="space-y-6 pt-8 border-t">
           <h2 className="text-2xl font-bold">Contact Us Regarding Privacy</h2>
           <p className="text-muted-foreground">
@@ -143,7 +210,7 @@ export default function PrivacyPage() {
           </p>
           <div className="bg-muted/50 p-6 rounded-2xl">
             <p className="font-bold">AIM Stock Privacy Team</p>
-            <p className="text-primary">privacy.aimstock@aimtechgroups.com</p>
+            <p className="text-primary">info.aimstock@aimtechgroups.com</p>
             <p>Addis Ababa, Ethiopia</p>
           </div>
         </div>

@@ -70,21 +70,21 @@ export const PublicHeader = () => {
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-20 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 group">
-            <Image src={logo} alt="Logo" width={40} height={40} />
-            <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
+          <Link href="/" className="flex items-center space-x-2 group shrink-0">
+            <Image src={logo} alt="Logo" width={40} height={40} className="shrink-0" />
+            <span className="text-lg md:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70 whitespace-nowrap">
               AIM <span className="text-primary">Stock</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center gap-x-4 lg:gap-x-8">
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary relative py-1",
+                  "text-xs lg:text-sm font-medium transition-colors hover:text-primary relative py-1 whitespace-nowrap",
                   pathname === item.href
                     ? "text-primary"
                     : "text-muted-foreground",
@@ -101,17 +101,30 @@ export const PublicHeader = () => {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden lg:flex items-center gap-x-3 lg:gap-x-4">
             <ThemeToggle />
+            <Link href="https://app.aimstock.aimtechgroups.com/auth/login" className="shrink-0">
+              <Button variant="ghost" size="sm" className="font-semibold px-4 lg:px-6">
+                Log In
+              </Button>
+            </Link>
+            <Link href="https://app.aimstock.aimtechgroups.com/auth/register" className="shrink-0">
+              <Button size="sm" className="font-semibold px-4 lg:px-6 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300">
+                Join Now
+              </Button>
+            </Link>
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            className="md:hidden p-2 text-foreground"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* Mobile Actions */}
+          <div className="flex lg:hidden items-center space-x-2">
+            <ThemeToggle />
+            <button
+              className="p-2 text-foreground"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -121,7 +134,7 @@ export const PublicHeader = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="md:hidden absolute top-20 left-0 right-0 bg-background/95 backdrop-blur-xl border-b p-6 space-y-6 shadow-2xl"
+          className="lg:hidden absolute top-20 left-0 right-0 bg-background/95 backdrop-blur-xl border-b p-6 space-y-6 shadow-2xl"
         >
           <div className="flex flex-col space-y-4">
             {NAV_ITEMS.map((item) => (
@@ -138,13 +151,21 @@ export const PublicHeader = () => {
               </Link>
             ))}
           </div>
-          <div className="flex flex-col space-y-3 pt-6 border-t">
-            <div className="flex items-center justify-between px-2">
-              <span className="text-sm font-medium text-muted-foreground">
-                Appearance
-              </span>
-              <ThemeToggle />
-            </div>
+          <div className="flex flex-col space-y-4 pt-6 border-t">
+            <Link
+              href="https://app.aimstock.aimtechgroups.com/auth/login"
+              onClick={() => setIsOpen(false)}
+            >
+              <Button variant="outline" className="w-full h-12 text-lg">
+                Log In
+              </Button>
+            </Link>
+            <Link
+              href="https://app.aimstock.aimtechgroups.com/auth/register"
+              onClick={() => setIsOpen(false)}
+            >
+              <Button className="w-full h-12 text-lg">Join Now</Button>
+            </Link>
           </div>
         </motion.div>
       )}

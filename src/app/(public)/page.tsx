@@ -16,6 +16,7 @@ import {
   ClipboardCheck,
   CreditCard,
   Download,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaGooglePlay, FaTelegramPlane } from "react-icons/fa";
@@ -116,7 +117,17 @@ export default function LandingPage() {
                     Download APK
                   </Button>
                 </Link>
-                <Link href="https://t.me/aim_technologies">
+                <Link href="https://app.aimstock.aimtechgroups.com">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-14 px-8 text-lg flex items-center gap-2 border-primary/20 hover:bg-primary/5 transition-all shadow-sm"
+                  >
+                    <LayoutDashboard className="w-5 h-5 text-primary" />
+                    Launch Web App
+                  </Button>
+                </Link>
+                {/* <Link href="https://t.me/aim_technologies">
                   <Button
                     size="lg"
                     variant="outline"
@@ -125,7 +136,7 @@ export default function LandingPage() {
                     <FaTelegramPlane />
                     Join The Community
                   </Button>
-                </Link>
+                </Link> */}
                 {/* <Link href="https://play.google.com/store/apps/details?id=your.app.id">
                   <Button
                     size="lg"
@@ -297,6 +308,23 @@ export default function LandingPage() {
               Stock ERP.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
+              <Link href="https://app.aimstock.aimtechgroups.com/auth/register">
+                <Button
+                  size="lg"
+                  className="h-16 px-12 text-xl bg-primary hover:bg-primary/90 text-white rounded-full shadow-xl shadow-primary/20"
+                >
+                  Get Started Free
+                </Button>
+              </Link>
+              <Link href="https://app.aimstock.aimtechgroups.com/auth/login">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 px-12 text-xl rounded-full"
+                >
+                  Log In
+                </Button>
+              </Link>
               {/* <Link href="/admin">
                 <Button
                   size="lg"

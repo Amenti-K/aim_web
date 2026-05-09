@@ -8,6 +8,7 @@ export interface ICompanyList {
   createdAt: string;
   subscription: ISubscription | null;
   owner: IUser | null;
+  trend: number;
 }
 
 export interface ICompany extends ICompanyList {

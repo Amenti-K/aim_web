@@ -9,6 +9,7 @@ import {
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
 import { ICompanyList } from "../interface/company/company.interface";
 import { formatDate } from "@/lib/formatter";
+import { TrendingDown, TrendingUp } from "lucide-react";
 
 interface CompanyTableProps {
   companies: ICompanyList[];
@@ -29,6 +30,7 @@ export const CompanyTable: React.FC<CompanyTableProps> = ({
             <TableHead>Phone</TableHead>
             <TableHead>Plan</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Trend</TableHead>
             <TableHead className="rounded-tr-md">Created</TableHead>
             {/* <TableHead className="text-right">Actions</TableHead> */}
           </TableRow>
@@ -46,6 +48,11 @@ export const CompanyTable: React.FC<CompanyTableProps> = ({
           ) : (
             companies.map((company) => {
               const owner = company.owner;
+              const trend = {
+                uptrend: company.trend > 0,
+                neutral: company.trend === 0,
+                value: Math.abs(company.trend),
+              };
               return (
                 <TableRow
                   key={company.id}
@@ -63,6 +70,18 @@ export const CompanyTable: React.FC<CompanyTableProps> = ({
                       <SubscriptionBadge status={company.subscription.status} />
                     ) : (
                       "-"
+                    )}
+                  </TableCell>
+                  <TableCell
+                    className={`${trend.uptrend ? "text-green-500" : trend.neutral ? "text-yellow-500" : "text-red-500"}`}
+                  >
+                    {trend.value} %{" "}
+                    {trend.neutral ? (
+                      ""
+                    ) : trend.uptrend ? (
+                      <TrendingUp />
+                    ) : (
+                      <TrendingDown />
                     )}
                   </TableCell>
                   <TableCell>{formatDate(company.createdAt)}</TableCell>

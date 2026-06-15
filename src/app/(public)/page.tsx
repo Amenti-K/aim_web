@@ -102,19 +102,16 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
                 <Link
-                  href={
-                    AIMSTOCK_DATA.productLinks.filter(
-                      (link) => link.name === "Download",
-                    )[0].href
-                  }
-                  download="AimStock_v1.apk"
+                  href="https://play.google.com/store/apps/details?id=com.aimtechnologies.aimstock"
+                  target="_blank"
                 >
                   <Button
                     size="lg"
-                    className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-white shadow-xl"
+                    variant="outline"
+                    className="h-14 px-8 text-lg flex items-center gap-2 border-primary/20 hover:bg-primary/5 transition-all shadow-sm"
                   >
-                    <Download />
-                    Download APK
+                    <FaGooglePlay className="w-5 h-5 text-primary" />
+                    Play Store
                   </Button>
                 </Link>
                 <Link href="https://app.aimstock.aimtechgroups.com">
@@ -129,25 +126,32 @@ export default function LandingPage() {
                 </Link>
                 {/* <Link href="https://t.me/aim_technologies">
                   <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-14 px-8 text-lg flex items-center gap-2"
+                  size="lg"
+                  variant="outline"
+                  className="h-14 px-8 text-lg flex items-center gap-2"
                   >
-                    <FaTelegramPlane />
-                    Join The Community
+                  <FaTelegramPlane />
+                  Join The Community
                   </Button>
-                </Link> */}
-                {/* <Link href="https://play.google.com/store/apps/details?id=your.app.id">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-14 px-8 text-lg flex items-center gap-2"
+                  </Link> */}
+                {/* <Link
+                    href={
+                      AIMSTOCK_DATA.productLinks.filter(
+                        (link) => link.name === "Download",
+                      )[0].href
+                    }
+                    download="AimStock_v1.apk"
                   >
-                    <FaGooglePlay />
-                    Play Store
-                  </Button>
-                </Link> */}
+                    <Button
+                      size="lg"
+                      className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-white shadow-xl"
+                    >
+                      <Download />
+                      Download APK
+                    </Button>
+                  </Link> */}
               </div>
+
               <div className="flex items-center space-x-6 pt-6 text-muted-foreground">
                 <div className="flex items-center space-x-2">
                   <ShieldCheck size={20} className="text-primary" />

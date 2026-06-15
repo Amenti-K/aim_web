@@ -7,9 +7,6 @@ import {
   Clock,
   XCircle,
   AlertCircle,
-  ShieldAlert,
-  ShieldCheck,
-  Loader2,
 } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
@@ -28,8 +25,10 @@ import {
   useDisableMaintenance,
   useGetMaintenanceStatus,
 } from "@/api/admin/api.auth";
+import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
+  const router = useRouter();
   const { data: response, isLoading } = useGetAnalytics();
   const analytics = response?.data;
 
@@ -92,6 +91,9 @@ const Dashboard = () => {
           value={analytics?.totalCompanies || 0}
           icon={Building2}
           description="Registered companies"
+          onClick={() => {
+            router.push("/admin/company");
+          }}
         />
         <StatsCard
           title="Total Users"

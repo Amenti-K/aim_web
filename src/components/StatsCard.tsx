@@ -1,6 +1,6 @@
-import { LucideIcon } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { LucideIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface StatsCardProps {
   title: string;
@@ -12,6 +12,7 @@ interface StatsCardProps {
     isPositive: boolean;
   };
   className?: string;
+  onClick?: () => void;
 }
 
 export const StatsCard: React.FC<StatsCardProps> = ({
@@ -21,9 +22,13 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   icon: Icon,
   trend,
   className,
+  onClick,
 }) => {
   return (
-    <Card className={cn('transition-shadow hover:shadow-md', className)}>
+    <Card
+      className={cn("transition-shadow hover:shadow-md", className)}
+      onClick={onClick}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
@@ -38,11 +43,11 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         {trend && (
           <p
             className={cn(
-              'mt-1 text-xs',
-              trend.isPositive ? 'text-green-600' : 'text-destructive'
+              "mt-1 text-xs",
+              trend.isPositive ? "text-green-600" : "text-destructive",
             )}
           >
-            {trend.isPositive ? '+' : '-'}
+            {trend.isPositive ? "+" : "-"}
             {Math.abs(trend.value)}% from last month
           </p>
         )}
